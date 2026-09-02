@@ -72,67 +72,32 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 px-6 pt-3 border-b border-slate-800 bg-[#080b12] overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('TRAIL')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-2 ${
-              activeTab === 'TRAIL'
-                ? 'bg-blue-600 text-white border-t border-x border-blue-500'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <DollarSign className="w-3.5 h-3.5" />
-            <span>Money Trail</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('HYPOTHESES')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-2 ${
-              activeTab === 'HYPOTHESES'
-                ? 'bg-blue-600 text-white border-t border-x border-blue-500'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>AI Hypotheses ({exceptionCase.hypotheses.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('AGENTS')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-2 ${
-              activeTab === 'AGENTS'
-                ? 'bg-blue-600 text-white border-t border-x border-blue-500'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>Tri-Agent & Dual-Key Telemetry</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('EVIDENCE')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-2 ${
-              activeTab === 'EVIDENCE'
-                ? 'bg-blue-600 text-white border-t border-x border-blue-500'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Evidence Ledger ({exceptionCase.evidence.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('POLICY')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-2 ${
-              activeTab === 'POLICY'
-                ? 'bg-blue-600 text-white border-t border-x border-blue-500'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Deterministic Policy Check</span>
-          </button>
+        {/* Segmented Tab Navigation Bar */}
+        <div className="px-6 pt-3 border-b border-slate-800 bg-[#0b0e17] flex items-center gap-1 overflow-x-auto scrollbar-none">
+          {[
+            { id: 'TRAIL', label: 'Money Trail', icon: DollarSign },
+            { id: 'HYPOTHESES', label: `AI Hypotheses (${exceptionCase.hypotheses.length})`, icon: Layers },
+            { id: 'AGENTS', label: 'Tri-Agent Telemetry', icon: Cpu },
+            { id: 'EVIDENCE', label: `Evidence (${exceptionCase.evidence.length})`, icon: FileText },
+            { id: 'POLICY', label: 'Policy Check', icon: Lock }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-all flex items-center gap-1.5 border-b-2 whitespace-nowrap ${
+                  isActive
+                    ? 'text-indigo-400 border-indigo-500 bg-indigo-500/10 font-semibold'
+                    : 'text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-900/50'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Body */}
