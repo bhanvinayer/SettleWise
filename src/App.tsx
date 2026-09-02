@@ -7,6 +7,7 @@ import { HonestExceptionsView } from './components/HonestExceptionsView';
 import { MoneyRecoveryManager } from './components/MoneyRecoveryManager';
 import { CounterfactualReplayModal } from './components/CounterfactualReplayModal';
 import { PolicyGuardrailsConfigurator } from './components/PolicyGuardrailsConfigurator';
+import { LandingPage } from './components/LandingPage';
 
 import { ExceptionCase, BenchmarkMetrics, PolicyGuardrails, DecisionAction } from './types/settlewise';
 import { generateSyntheticBatch } from './engine/syntheticDataEngine';
@@ -14,6 +15,7 @@ import { runCounterfactualReplayBenchmark } from './engine/counterfactualReplay'
 import { DEFAULT_POLICY_GUARDRAILS } from './engine/policyEngine';
 
 export function App() {
+  const [viewMode, setViewMode] = useState<'LANDING' | 'DASHBOARD'>('LANDING');
   const [cases, setCases] = useState<ExceptionCase[]>([]);
   const [metrics, setMetrics] = useState<BenchmarkMetrics | null>(null);
   const [guardrails, setGuardrails] = useState<PolicyGuardrails>(DEFAULT_POLICY_GUARDRAILS);
@@ -35,6 +37,15 @@ export function App() {
     const initialMetrics = runCounterfactualReplayBenchmark(50, guardrails);
     setMetrics(initialMetrics);
   }, []);
+
+  const handleLaunchFromLanding = (action?: 'DASHBOARD' | 'REPLAY' | 'HONEST') => {
+    setViewMode('DASHBOARD');
+    if (action === 'REPLAY') {
+      setShowReplayModal(true);
+    } else if (action === 'HONEST') {
+      setShowHonestExceptionsModal(true);
+    }
+  };
 
   const handleUpdateCaseAction = (caseId: string, newAction: DecisionAction, note: string) => {
     setCases((prev) =>
@@ -84,8 +95,12 @@ export function App() {
     (c) => c.authorizedAction === 'BLOCK' || c.status === 'BLOCKED' || c.honestExceptionReason
   ).length;
 
+  if (viewMode === 'LANDING') {
+    return <LandingPage onLaunchApp={handleLaunchFromLanding} />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 font-sans selection:bg-blue-600 selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#0b0e17] text-slate-100 font-sans selection:bg-indigo-600 selection:text-white flex flex-col">
       
       {/* Brand Header */}
       <Header
@@ -93,6 +108,7 @@ export function App() {
         onOpenPolicy={() => setShowPolicyModal(true)}
         onOpenRecovery={() => setShowRecoveryModal(true)}
         onOpenHonestExceptions={() => setShowHonestExceptionsModal(true)}
+        onOpenLanding={() => setViewMode('LANDING')}
         honestExceptionsCount={honestExceptionsCount}
       />
 
@@ -169,8 +185,11 @@ export function App() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#080b12] py-4 px-6 text-center text-xs text-slate-500 font-mono">
-        SettleWise — Razorpay AI Buildathon 2026 Submission | Track 04 — AI Finance Controller | Principle: AI Investigates. Rules Authorize.
+      <footer className="border-t border-slate-800/80 bg-[#080b12] py-4 px-6 text-center text-xs text-slate-500 font-mono flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto w-full">
+        <span>SettleWise — Razorpay AI Buildathon 2026 Submission | Track 04 — AI Finance Controller</span>
+        <button onClick={() => setViewMode('LANDING')} className="text-indigo-400 hover:underline">
+          Return to Product Landing Page →
+        </button>
       </footer>
 
     </div>

@@ -6,6 +6,7 @@ interface HeaderProps {
   onOpenPolicy: () => void;
   onOpenRecovery: () => void;
   onOpenHonestExceptions: () => void;
+  onOpenLanding?: () => void;
   honestExceptionsCount: number;
 }
 
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPolicy,
   onOpenRecovery,
   onOpenHonestExceptions,
+  onOpenLanding,
   honestExceptionsCount
 }) => {
   return (
@@ -22,13 +24,16 @@ export const Header: React.FC<HeaderProps> = ({
         
         {/* Brand & Track Identification */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <div 
+            onClick={onOpenLanding}
+            className="flex items-center gap-2.5 cursor-pointer group"
+          >
+            <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:border-indigo-500/50 transition-all">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-tight text-white font-sans">
+                <span className="font-extrabold text-lg tracking-tight text-white font-sans group-hover:text-indigo-300 transition-colors">
                   SettleWise
                 </span>
                 <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
