@@ -159,17 +159,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchApp }) => {
         {/* Track Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-mono mb-6 backdrop-blur-sm">
           <Zap className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Closed-Loop Autonomous Finance-Ops Benchmark</span>
+          <span>RECONCILE → INVESTIGATE → CHALLENGE → SIMULATE → AUTHORIZE → RECOVER</span>
         </div>
 
         {/* Main Headline */}
         <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight max-w-4xl mx-auto leading-[1.12] mb-6 font-sans">
-          Verification Capacity, Not Generation Speed, is the Bottleneck in AI Finance.
+          The Finance Controller That Tries to Prove Itself Wrong.
         </h1>
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8">
-          <strong className="text-slate-200">SettleWise</strong> is the autonomous financial controller built on a dual-key policy gate. Multi-agent AI investigates complex ledger discrepancies — while deterministic rules authorize money movement.
+          <strong className="text-slate-200">SettleWise</strong> asks a CFO-grade question: <em className="text-indigo-300 font-medium">&ldquo;Before AI touches the books, can I prove its decision is safe—and what happens to our capital if I change our policy controls?&rdquo;</em>  
+          <span className="block mt-2 font-mono text-xs text-indigo-400 font-semibold uppercase tracking-wider">&ldquo;AI Proposes. AI Challenges. Rules Decide.&rdquo;</span>
         </p>
 
         {/* Call to Action Buttons */}

@@ -1,32 +1,42 @@
-# 🟢 SettleWise — Autonomous Financial Exception Investigator & Money Recovery Controller
+# 🟢 SettleWise — The Finance Controller That Tries to Prove Itself Wrong
 
 > **Razorpay Buildathon 2026 Submission** | **Track 04: AI Finance Controller**  
-> **Core Principle**: *"AI Investigates. Rules Authorize."*
+> **Core Principle**: *"AI Proposes. AI Challenges. Rules Decide."*  
+> **Control Loop**: `RECONCILE → INVESTIGATE → CHALLENGE → SIMULATE → AUTHORIZE → RECOVER`
 
 ---
 
 ## ⚡ Executive Summary
 
-Financial operations in 2026 face a fundamental bottleneck: **verification capacity, not generation speed**. Reconciliation, settlement discrepancy resolution, fee audit, and cash position forecasting are still largely manual, fragile, and prone to silent money leakage.
+Most AI financial reconciliation systems ask a simple question: *"Can I reconcile this transaction?"*  
+**SettleWise asks a much harder, CFO-grade question:**  
+> *"Before I let AI touch the books, can I prove its reasoning is safe—and what happens to our capital if I tighten or loosen our policy controls?"*
 
-**SettleWise** is an enterprise-grade AI Financial Controller that automates the closed-loop investigation and resolution of settlement discrepancies across **multi-source financial ledgers** (Bank Statements, Gateway Ledgers, Webhook Logs, and Enterprise ERPs). 
+Rather than being another basic "AI reconciliation bot" (a feature already built into standard dashboards), **SettleWise is a Counterfactual Financial Control System**. It operates on a 6-step autonomous loop:
 
-Rather than relying on unbounded LLM output, SettleWise strictly separates **AI Reasoning & Hypothesis Synthesis** from **Deterministic Financial Authorization**.
+```text
+  [1. Reconcile] ──► [2. Investigate] ──► [3. Challenge (Adversarial Auditor)]
+                                                      │
+  [6. Recover]   ◄── [5. Authorize]   ◄── [4. Simulate (Policy Replay)]
+```
+
+---
+
+## 🔥 The 3 Core USPs That Separate SettleWise From Every Submission
+
+### 1. 🤺 Adversarial Auditor: "The AI That Tries to Prove Itself Wrong"
+* **The Innovation**: SettleWise does not simply pick the highest-confidence explanation. Before passing a hypothesis to authorization, an independent **Adversarial Auditor Agent** actively attempts to disprove the primary conclusion (testing counter-hypotheses like duplicate payout injection, T+1 settlement timing drift, or un-webhooked refunds).
+* **The Safety Guarantee**: If counter-evidence cannot be disproven, auto-resolution is immediately blocked, eliminating false-positive payout risks.
+
+### 2. 🎛️ Counterfactual Policy Simulator: "Simulate Policy Before Deployment"
+* **The Innovation**: SettleWise gives Finance Controllers a live policy sandbox to answer: *"How much autonomy should the AI be allowed to have?"*
+* **Quantified Exposure Modeling**: Controllers can adjust confidence thresholds (e.g. 95% vs 90% vs 99%) and margin caps across 10,000 records to instantly measure the trade-off: **Automation % vs. Potential Rupee Exposure/Leakage** before deploying policy changes to production.
+
+### 3. 💸 Money Recovery Engine: "Finds Money That Books Lost"
+* **The Innovation**: Standard reconciliation tools stop at flagging a mismatch. SettleWise isolates **why** money leaked (intermediate bank charge drops, MDR slab mismatches, missing webhook drops) and automatically generates **Dispute Claim File Bundles** complete with UTRs, timestamps, and contract rate proof for bank recovery.
 
 ---
 
-## 🎯 Razorpay Evaluation Criteria Alignment
-
-| Evaluation Criterion | SettleWise Implementation |
-| :--- | :--- |
-| **Problem Taste** | Solves high-value settlement reconciliation, fee drift, and intermediate bank leakage. |
-| **Build Quality** | High-density Dark Mode UI, real-time telemetry, zero-dependency Vite + React + TypeScript engine. |
-| **AI Judgment** | AI decomposes root causes & synthesizes evidence; deterministic rules authorize actions. |
-| **Measured Accuracy** | Real-time **Counterfactual Benchmark Engine** evaluating 50 to 10,000 record batches with precision metrics. |
-| **Forward Cash Forecaster** | 7-day rolling liquidity & payout forecaster modeling reconciled inflows vs. quarantined risk capital. |
-| **Honest Exception & Audit Export** | Safely isolates ambiguous cases and exports downloadable JSON/CSV audit reports for dispute claims. |
-
----
 
 ## 🏗️ LangGraph State Machine Architecture (`@langchain/langgraph`)
 
