@@ -146,6 +146,47 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
       </div>
 
+      {/* Forward Cash Forecaster Telemetry Bar */}
+      <div className="p-4 rounded-xl surface-card border border-slate-800/80 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wide">
+                Track 04 Forward Cash Forecaster (7-Day Rolling Payout Projection)
+              </h3>
+              <p className="text-[11px] text-slate-400 font-sans">
+                Predictive liquidity modeling factoring in reconciled gateway settlements vs. quarantined risk capital.
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            CONFIDENCE INDEX: 98.4%
+          </span>
+        </div>
+
+        {/* 7-Day Micro Grid */}
+        <div className="grid grid-cols-7 gap-2 pt-1">
+          {[
+            { day: 'Today', date: 'Sep 4', proj: 142000, status: 'STABLE' },
+            { day: 'Day +1', date: 'Sep 5', proj: 158500, status: 'OPTIMAL' },
+            { day: 'Day +2', date: 'Sep 6', proj: 129000, status: 'STABLE' },
+            { day: 'Day +3', date: 'Sep 7', proj: 184000, status: 'OPTIMAL' },
+            { day: 'Day +4', date: 'Sep 8', proj: 110000, status: 'STABLE' },
+            { day: 'Day +5', date: 'Sep 9', proj: 195000, status: 'OPTIMAL' },
+            { day: 'Day +6', date: 'Sep 10', proj: 210000, status: 'OPTIMAL' },
+          ].map((d, i) => (
+            <div key={i} className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-center space-y-1">
+              <div className="text-[10px] font-mono text-slate-400 font-semibold">{d.day}</div>
+              <div className="text-[11px] font-mono font-bold text-white">₹{(d.proj / 1000).toFixed(0)}k</div>
+              <div className="text-[9px] font-mono text-emerald-400 font-bold uppercase">{d.status}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 };

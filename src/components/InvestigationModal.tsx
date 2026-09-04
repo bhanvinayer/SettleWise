@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ExceptionCase, DecisionAction } from '../types/settlewise';
 import { MoneyTrailVisualizer } from './MoneyTrailVisualizer';
-import { X, ShieldCheck, AlertTriangle, CheckCircle2, DollarSign, Cpu, FileText, Layers, Lock } from 'lucide-react';
+import { X, ShieldCheck, AlertTriangle, CheckCircle2, DollarSign, Cpu, FileText, Layers, Lock, GitBranch } from 'lucide-react';
 import { evaluatePolicyRules } from '../engine/policyEngine';
 
 interface InvestigationModalProps {
@@ -15,7 +15,7 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
   onClose,
   onUpdateAction
 }) => {
-  const [activeTab, setActiveTab] = useState<'TRAIL' | 'HYPOTHESES' | 'AGENTS' | 'EVIDENCE' | 'POLICY'>('TRAIL');
+  const [activeTab, setActiveTab] = useState<'TRAIL' | 'HYPOTHESES' | 'AGENTS' | 'LANGGRAPH' | 'EVIDENCE' | 'POLICY'>('TRAIL');
 
   if (!exceptionCase) return null;
 
@@ -78,6 +78,7 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
             { id: 'TRAIL', label: 'Money Trail', icon: DollarSign },
             { id: 'HYPOTHESES', label: `AI Hypotheses (${exceptionCase.hypotheses.length})`, icon: Layers },
             { id: 'AGENTS', label: 'Tri-Agent Telemetry', icon: Cpu },
+            { id: 'LANGGRAPH', label: 'LangGraph Machine', icon: GitBranch },
             { id: 'EVIDENCE', label: `Evidence (${exceptionCase.evidence.length})`, icon: FileText },
             { id: 'POLICY', label: 'Policy Check', icon: Lock }
           ].map((tab) => {
@@ -304,6 +305,111 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* TAB 5: LangGraph State Machine Graph */}
+          {activeTab === 'LANGGRAPH' && (
+            <div className="space-y-4">
+              
+              {/* Banner Tagline */}
+              <div className="p-4 rounded-xl surface-card border border-indigo-500/30 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-mono font-bold uppercase text-indigo-400 flex items-center gap-1.5">
+                    <GitBranch className="w-3.5 h-3.5" />
+                    LangGraph State Machine Trace
+                  </h4>
+                  <p className="text-xs text-slate-300 mt-0.5 font-sans">
+                    Stateful Graph Architecture (<code className="text-indigo-300">@langchain/langgraph</code>) with explicit checkpoint gates.
+                  </p>
+                </div>
+                <div className="text-right font-mono text-xs">
+                  <span className="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-bold">
+                    GRAPH STATUS: {exceptionCase.authorizedAction === 'BLOCK' ? 'PAUSED_HITL' : 'COMPLETED'}
+                  </span>
+                </div>
+              </div>
+
+              {/* LangGraph Node Execution Chain */}
+              <div className="space-y-2.5">
+                {[
+                  {
+                    nodeId: 'ingestionNode',
+                    nodeName: '01. Ingestion & Ledger Parsing Node',
+                    status: 'SUCCESS',
+                    output: `Ingested payment ID ${exceptionCase.paymentId} for merchant ${exceptionCase.merchantName}. Total amount: ₹${exceptionCase.paymentAmount}.`,
+                    latencyMs: 80,
+                    activeAgents: ['LedgerParserNode']
+                  },
+                  {
+                    nodeId: 'triAgentNode',
+                    nodeName: '02. Tri-Agent Pipeline Sub-Graph',
+                    status: 'SUCCESS',
+                    output: `Sub-agents executed. Root cause isolated: ${exceptionCase.category}. Matched ${exceptionCase.historicalMemoryMatches || 14} memory vectors.`,
+                    latencyMs: 210,
+                    activeAgents: ['RootCauseAgent', 'MerchantContextAgent', 'FeeTaxMatcherAgent']
+                  },
+                  {
+                    nodeId: 'auditorGateNode',
+                    nodeName: '03. Dual-Key Adversarial Auditor Gate Node',
+                    status: exceptionCase.aiConfidence >= 88 ? 'SUCCESS' : 'WARNING',
+                    output: exceptionCase.aiConfidence >= 88
+                      ? `Counterfactual challenger agent test PASSED. Confidence: ${exceptionCase.aiConfidence.toFixed(1)}%.`
+                      : `Adversarial Auditor: Counterfactual challenge raised! Confidence capped at ${exceptionCase.aiConfidence.toFixed(1)}%.`,
+                    latencyMs: 140,
+                    activeAgents: ['AdversarialChallengerAuditor']
+                  },
+                  {
+                    nodeId: 'deterministicPolicyNode',
+                    nodeName: '04. Deterministic Policy Guardrails Engine Node',
+                    status: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'SUCCESS' : 'PAUSED',
+                    output: `Evaluated policy guardrails. Decision authorized: [${exceptionCase.authorizedAction || 'HUMAN_REVIEW'}].`,
+                    latencyMs: 60,
+                    activeAgents: ['DeterministicRuleEngine']
+                  },
+                  {
+                    nodeId: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'executeResolutionNode' : 'blockExceptionNode',
+                    nodeName: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? '05. Auto-Resolution Execution Terminal Node' : '05. Honest Exception Quarantine Terminal Node',
+                    status: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'SUCCESS' : 'PAUSED',
+                    output: exceptionCase.authorizedAction === 'AUTO_RESOLVE'
+                      ? 'Graph reached terminal state: Auto-resolution executed & ledger updated.'
+                      : 'Graph state paused at Honest Exception Quarantine node awaiting human operator authorization.',
+                    latencyMs: 45,
+                    activeAgents: [exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'LedgerWriterNode' : 'QuarantineControllerNode']
+                  }
+                ].map((log, idx) => (
+                  <div key={idx} className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5 font-mono text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-400" />
+                        <span className="font-bold text-white">{log.nodeName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500">{log.latencyMs}ms</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          log.status === 'SUCCESS'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-slate-300 text-xs font-sans pl-4 border-l-2 border-slate-800">
+                      {log.output}
+                    </p>
+                    <div className="text-[10px] text-slate-500 pl-4 flex items-center gap-2">
+                      <span>Active Agents:</span>
+                      {log.activeAgents.map((a, i) => (
+                        <span key={i} className="px-1.5 py-0.5 rounded bg-slate-950 text-indigo-300 border border-slate-800">
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
           )}
 

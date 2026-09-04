@@ -159,3 +159,31 @@ export interface InstitutionalPattern {
   historicalResolutionSuccess: number;
   suggestedAction: DecisionAction;
 }
+
+export interface LangGraphNodeLog {
+  nodeId: string;
+  nodeName: string;
+  timestamp: string;
+  status: 'SUCCESS' | 'WARNING' | 'PAUSED' | 'FAILED';
+  outputSummary: string;
+  latencyMs: number;
+  stateSnapshot: {
+    stage: string;
+    activeAgents: string[];
+    confidence: number;
+    decision?: string;
+  };
+}
+
+export interface LangGraphTelemetry {
+  graphId: string;
+  executionStatus: 'COMPLETED' | 'PAUSED_HITL' | 'BLOCKED';
+  totalLatencyMs: number;
+  nodesExecuted: LangGraphNodeLog[];
+  stateCheckpoint: {
+    currentNode: string;
+    nextEdge: string;
+    memoryVectorsMatched: number;
+    policyPassed: boolean;
+  };
+}

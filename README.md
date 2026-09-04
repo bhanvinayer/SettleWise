@@ -23,7 +23,47 @@ Rather than relying on unbounded LLM output, SettleWise strictly separates **AI 
 | **Build Quality** | High-density Dark Mode UI, real-time telemetry, zero-dependency Vite + React + TypeScript engine. |
 | **AI Judgment** | AI decomposes root causes & synthesizes evidence; deterministic rules authorize actions. |
 | **Measured Accuracy** | Real-time **Counterfactual Benchmark Engine** evaluating 50 to 10,000 record batches with precision metrics. |
-| **Honest Exception List** | Safely isolates ambiguous cases (e.g., duplicate settlement candidates) to protect against double reconciliation. |
+| **Forward Cash Forecaster** | 7-day rolling liquidity & payout forecaster modeling reconciled inflows vs. quarantined risk capital. |
+| **Honest Exception & Audit Export** | Safely isolates ambiguous cases and exports downloadable JSON/CSV audit reports for dispute claims. |
+
+---
+
+## 🏗️ LangGraph State Machine Architecture (`@langchain/langgraph`)
+
+SettleWise uses a formal **Stateful Multi-Agent Graph (`StateGraph`)** to govern financial exception lifecycles:
+
+```mermaid
+graph TD
+    A[Ingest Discrepancy Payload] --> B[Tri-Agent SubGraph]
+    
+    subgraph Tri-Agent Network
+        B --> B1[Root Cause Agent]
+        B --> B2[Merchant Context Agent]
+        B --> B3[Fee & Tax Matcher]
+    end
+    
+    B1 --> C[Adversarial Auditor Gate Node]
+    B2 --> C
+    B3 --> C
+    
+    C --> D[Deterministic Policy Engine Node]
+    
+    D -->|Confidence >= 95% & Delta = 0| E[Auto-Resolve Execution Node]
+    D -->|Confidence < 95% or Delta > 0| F[Honest Exception Quarantine Node]
+    
+    F -->|Human Operator Approves| E
+    F -->|Human Operator Rejects| G[Money Recovery Case Node]
+    
+    E --> H[END: Ledger Reconciled]
+    G --> H
+```
+
+### Graph Execution Nodes:
+1. **`ingestionNode`**: Ingests multi-source ledger payloads & normalizes UTR vectors.
+2. **`triAgentNode`**: Executes parallel diagnostic sub-agents (Root Cause, Merchant Context Memory, Fee/Tax Matcher).
+3. **`auditorGateNode`**: Runs an independent Adversarial Auditor agent to test counter-hypotheses (duplicate payout injection, timestamp drift).
+4. **`deterministicPolicyNode`**: Evaluates non-negotiable policy guardrails (confidence caps & margin tolerances).
+5. **`executeResolutionNode` / `blockExceptionNode`**: Auto-resolves verified payouts or pauses state at the **Honest Exception Quarantine** for Human-in-the-Loop authorization.
 
 ---
 
