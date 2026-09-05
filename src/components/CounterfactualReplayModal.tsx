@@ -158,7 +158,7 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
                 <span>Safe escalation: <strong className="text-emerald-400">{currentMetrics.safeEscalationRate}%</strong></span>
               </div>
               <div className="text-[10px] font-mono text-emerald-400">
-                {currentMetrics.pipelineExecuted ? 'LIVE STATEGRAPH + POLICY PIPELINE EXECUTION VERIFIED' : 'DETERMINISTIC POLICY EVALUATION'} · OBSERVABILITY DELIVERY IS OPTIONAL
+                {currentMetrics.pipelineExecuted ? 'LIVE STATEGRAPH + POLICY PIPELINE EXECUTION VERIFIED' : 'DETERMINISTIC POLICY EVALUATION'}
               </div>
 
               {/* Summary Cards */}

@@ -82,7 +82,7 @@ export const PolicyGuardrailsConfigurator: React.FC<PolicyGuardrailsConfigurator
             {recommendation && (
               <div className="mt-3 space-y-2">
                 <div className="text-xs text-slate-200">{recommendation.summary}</div>
-                <div className="text-[10px] font-mono uppercase text-blue-300">Risk: {recommendation.riskLevel} · {recommendation.source === 'groq' ? 'Groq review' : 'Deterministic fallback'}</div>
+                <div className="text-[10px] font-mono uppercase text-blue-300">Risk: {recommendation.riskLevel} · {recommendation.source === 'groq' ? 'Groq review' : 'Rules engine'}</div>
                 {recommendation.recommendedChanges.map(change => (
                   <div key={change.field} className="p-2 rounded-lg bg-slate-900/70 border border-slate-800">
                     <div className="font-mono text-[11px] text-white">{change.field}: {String(change.value)}</div>
