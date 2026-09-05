@@ -529,6 +529,11 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
                 <span>{telemetry ? telemetry.executionStatus.replace('_', ' ') : 'Executing graph...'}</span>
                 <span>{telemetry ? `${telemetry.totalLatencyMs}ms` : '...'}</span>
               </div>
+              {telemetry && (
+                <div style={{ marginBottom: 10, padding: 9, borderRadius: 5, background: 'var(--surface-2)', border: '1px solid var(--border)', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Policy merge:</strong> deterministic {telemetry.stateCheckpoint.policyPassed ? 'passed' : 'blocked'} · LLM {telemetry.stateCheckpoint.llmPolicyUsed ? (telemetry.stateCheckpoint.llmPolicyApproved ? 'approved' : 'vetoed') : 'fallback'}
+                </div>
+              )}
               {(telemetry?.nodesExecuted || []).map((node, i) => (
                 <div key={i} style={{
                   padding: '8px 10px', marginBottom: 6, borderRadius: 5,

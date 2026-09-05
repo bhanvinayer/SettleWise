@@ -1,40 +1,49 @@
 import { BenchmarkMetrics, ExceptionCase, LangGraphTelemetry, PolicyGuardrails } from '../types/settlewise';
+import { createSettleWiseAgentRecommendation } from '../engine/settleWiseAgent';
 
 export interface PolicyRecommendation {
   summary: string;
   recommendedChanges: { field: string; value: string | number | boolean; reason: string }[];
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | string;
   reasoning: string;
+  source?: 'groq' | 'deterministic-fallback';
 }
 
 export async function requestPolicyRecommendation(
   guardrails: PolicyGuardrails,
   metrics: BenchmarkMetrics | null
 ): Promise<PolicyRecommendation> {
-  const response = await fetch('/api/ai-policy-recommendation', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ guardrails, metrics }),
-  });
-  const rawBody = await response.text();
-  let payload: { error?: string; recommendation?: PolicyRecommendation } = {};
-  if (rawBody.trim()) {
-    try {
-      payload = JSON.parse(rawBody) as typeof payload;
-    } catch {
-      throw new Error('AI service returned an invalid response. Check the Vercel API deployment.');
+  try {
+    const response = await fetch('/api/ai-policy-recommendation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guardrails, metrics }),
+    });
+    const rawBody = await response.text();
+    let payload: { error?: string; recommendation?: PolicyRecommendation; aiProvider?: string } = {};
+    if (rawBody.trim()) {
+      try {
+        payload = JSON.parse(rawBody) as typeof payload;
+      } catch {
+        throw new Error('AI service returned an invalid response');
+      }
     }
+    if (!response.ok) throw new Error(payload.error || 'AI policy recommendation unavailable');
+    if (!payload.recommendation) throw new Error('SettleWise Agent returned no recommendation');
+    return { ...payload.recommendation, source: payload.aiProvider === 'groq' ? 'groq' : 'deterministic-fallback' };
+  } catch {
+    return {
+      ...createSettleWiseAgentRecommendation(guardrails, metrics),
+      source: 'deterministic-fallback',
+    };
   }
-  if (!response.ok) throw new Error(payload.error || 'AI policy recommendation unavailable');
-  if (!payload.recommendation) throw new Error('AI service returned no recommendation. Check the Groq configuration.');
-  return payload.recommendation;
 }
 
 export async function traceInvestigation(
   caseItem: ExceptionCase,
   telemetry: LangGraphTelemetry
 ): Promise<void> {
-  await fetch('/api/langfuse-trace', {
+  const response = await fetch('/api/langfuse-trace', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -45,4 +54,16 @@ export async function traceInvestigation(
       metadata: { graphId: telemetry.graphId, totalLatencyMs: telemetry.totalLatencyMs, nodes: telemetry.nodesExecuted.length },
     }),
   });
+  const rawBody = await response.text();
+  let payload: { error?: string; traced?: boolean } = {};
+  if (rawBody.trim()) {
+    try {
+      payload = JSON.parse(rawBody) as typeof payload;
+    } catch {
+      throw new Error('Langfuse endpoint returned an invalid response');
+    }
+  }
+  if (!response.ok || payload.traced === false) {
+    throw new Error(payload.error || 'Langfuse trace was not accepted');
+  }
 }

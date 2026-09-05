@@ -40,7 +40,7 @@ Rather than being another basic "AI reconciliation bot" (a feature already built
 
 ## 🏗️ LangGraph State Machine Architecture (`@langchain/langgraph`)
 
-SettleWise uses a formal **Stateful Multi-Agent Graph (`StateGraph`)** to govern financial exception lifecycles:
+SettleWise uses a formal **Stateful Multi-Agent Graph (`StateGraph`)** to govern financial exception lifecycles. The graph is executed both for an opened transaction and during Batch Runs:
 
 ```mermaid
 graph TD
@@ -58,7 +58,8 @@ graph TD
     
     C --> D[Deterministic Policy Engine Node]
     
-    D -->|Confidence >= 95% & Delta = 0| E[Auto-Resolve Execution Node]
+   D --> L[Groq LLM Policy Review]
+   L -->|Deterministic pass + LLM approval| E[Auto-Resolve Execution Node]
     D -->|Confidence < 95% or Delta > 0| F[Honest Exception Quarantine Node]
     
     F -->|Human Operator Approves| E
@@ -73,7 +74,8 @@ graph TD
 2. **`triAgentNode`**: Executes parallel diagnostic sub-agents (Root Cause, Merchant Context Memory, Fee/Tax Matcher).
 3. **`auditorGateNode`**: Runs an independent Adversarial Auditor agent to test counter-hypotheses (duplicate payout injection, timestamp drift).
 4. **`deterministicPolicyNode`**: Evaluates non-negotiable policy guardrails (confidence caps & margin tolerances).
-5. **`executeResolutionNode` / `blockExceptionNode`**: Auto-resolves verified payouts or pauses state at the **Honest Exception Quarantine** for Human-in-the-Loop authorization.
+5. **`llmPolicyReviewNode`**: Uses the server-side Groq endpoint as a second policy reviewer. Groq may veto an approval, but cannot override deterministic policy failure.
+6. **`executeResolutionNode` / `blockExceptionNode`**: Auto-resolves verified payouts or pauses state at the exception quarantine for Human-in-the-Loop authorization.
 
 ---
 
@@ -144,6 +146,24 @@ Allows financial controllers and hackathon evaluators to test policy adjustments
 
 ### 5. Money Leakage & Recovery Controller
 Automatically detects intermediate bank fee deductions and un-webhooked refunds, generating formal **Claim Dispute Packages** for financial ops teams.
+
+## 📊 Evaluation Contract
+
+Every replay uses a fixed seed (`SW-TRACK04-001`) and explicit synthetic ground-truth actions. The benchmark reports:
+
+* Records processed and total rupees investigated
+* Correct policy actions against ground truth
+* Auto-resolution precision and false-positive rate
+* Safe escalation coverage and the complete exception list
+* Graph nodes executed, replay seed, and average pipeline latency
+
+Batch Runs execute the same LangGraph StateGraph used when an operator opens a transaction. The benchmark runs ingestion, tri-agent analysis, adversarial audit, deterministic policy evaluation, optional Groq policy review, and terminal routing before scoring the exact processed batch. Langfuse receives live per-record traces for the first 100 records and the UI reports attempted, delivered, and failed trace counts.
+
+## 🔐 AI and Observability Configuration
+
+Copy `.env.example` to `.env` for local configuration. `GROQ_API_KEY` is used only by the server-side SettleWise Agent endpoint for optional reasoning enrichment. `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` enable trace ingestion. Configure secrets in Vercel Project Settings and never use the `VITE_` prefix for credentials.
+
+Groq also runs as an optional `llmPolicyReviewNode` inside the LangGraph flow. Its verdict is merged with deterministic policy using a safety gate: deterministic failure always blocks auto-resolution, and an available LLM veto also blocks it. If Groq is unavailable, the graph records deterministic-only fallback and continues using the rules engine. Vercel serverless functions under `api/` keep Groq and Langfuse credentials out of the browser bundle.
 
 ---
 

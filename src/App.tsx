@@ -169,8 +169,8 @@ export function App() {
               guardrails={guardrails}
               onClose={() => setActiveView('command-center')}
               onApplyBatchResults={newMetrics => {
-                setMetrics(newMetrics);
-                setCases(generateSyntheticBatch(newMetrics.totalRecords));
+                setMetrics(newMetrics.metrics);
+                setCases(newMetrics.cases);
                 setActiveView('command-center');
               }}
             />
@@ -208,8 +208,8 @@ export function App() {
           guardrails={guardrails}
           onClose={() => setShowReplayModal(false)}
           onApplyBatchResults={newMetrics => {
-            setMetrics(newMetrics);
-            setCases(generateSyntheticBatch(newMetrics.totalRecords));
+            setMetrics(newMetrics.metrics);
+            setCases(newMetrics.cases);
           }}
         />
       )}

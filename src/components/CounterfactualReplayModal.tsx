@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { BenchmarkMetrics, PolicyGuardrails } from '../types/settlewise';
-import { runCounterfactualReplayBenchmark } from '../engine/counterfactualReplay';
+import { CounterfactualPipelineResult, runCounterfactualReplayPipeline } from '../engine/counterfactualReplay';
 import { Play, CheckCircle2, X, RefreshCw } from 'lucide-react';
 
 interface CounterfactualReplayModalProps {
   onClose: () => void;
-  onApplyBatchResults: (metrics: BenchmarkMetrics) => void;
+  onApplyBatchResults: (result: CounterfactualPipelineResult) => void;
   guardrails: PolicyGuardrails;
 }
 
@@ -18,14 +18,15 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentMetrics, setCurrentMetrics] = useState<BenchmarkMetrics | null>(null);
 
-  const handleExecuteReplay = () => {
+  const handleExecuteReplay = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      const res = runCounterfactualReplayBenchmark(batchSize, guardrails);
-      setCurrentMetrics(res);
+    try {
+      const result = await runCounterfactualReplayPipeline(batchSize, guardrails);
+      setCurrentMetrics(result.metrics);
+      onApplyBatchResults(result);
+    } finally {
       setIsRunning(false);
-      onApplyBatchResults(res);
-    }, 600);
+    }
   };
 
   return (
@@ -91,12 +92,12 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
               {isRunning ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Simulating Batch Replay...</span>
+                  <span>Running LangGraph Pipeline...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-current" />
-                  <span>Execute Benchmark</span>
+                  <span>Run Pipeline Benchmark</span>
                 </>
               )}
             </button>
@@ -116,9 +117,13 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono text-slate-400">
                 <span>Seed: <strong className="text-slate-200">{currentMetrics.replaySeed}</strong></span>
+                <span>Graph nodes: <strong className="text-slate-200">{currentMetrics.graphNodesExecuted}</strong></span>
                 <span>Correct actions: <strong className="text-slate-200">{currentMetrics.correctActionDecisions}/{currentMetrics.totalRecords}</strong></span>
                 <span>False positive rate: <strong className="text-rose-400">{currentMetrics.falsePositiveRate}%</strong></span>
                 <span>Safe escalation: <strong className="text-emerald-400">{currentMetrics.safeEscalationRate}%</strong></span>
+              </div>
+              <div className="text-[10px] font-mono text-emerald-400">
+                {currentMetrics.pipelineExecuted ? 'LIVE STATEGRAPH + POLICY PIPELINE EXECUTION VERIFIED' : 'DETERMINISTIC POLICY EVALUATION'} · OBSERVABILITY DELIVERY IS OPTIONAL
               </div>
 
               {/* Summary Cards */}

@@ -1,6 +1,7 @@
 import { Annotation, StateGraph, END, START } from '@langchain/langgraph';
 import { ExceptionCase, PolicyGuardrails, LangGraphTelemetry, LangGraphNodeLog } from '../types/settlewise';
 import { evaluatePolicyRules } from './policyEngine';
+import { reviewPolicyWithGroq, LlmPolicyReview } from '../services/llmPolicyReview';
 
 // Define Graph State Annotation using LangGraph's Annotation.Root
 export const FinanceControllerState = Annotation.Root({
@@ -33,6 +34,10 @@ export const FinanceControllerState = Annotation.Root({
   }>({
     reducer: (_, next) => next,
     default: () => ({ authorized: false, action: 'HUMAN_REVIEW', notes: [] }),
+  }),
+  llmPolicyReview: Annotation<LlmPolicyReview>({
+    reducer: (_, next) => next,
+    default: () => ({ available: false, approved: false, decision: 'HUMAN_REVIEW', risk: 'HIGH', reason: 'LLM review pending.', checks: [], provider: 'deterministic-only' }),
   }),
   logs: Annotation<LangGraphNodeLog[]>({
     reducer: (curr, next) => [...curr, ...next],
@@ -179,6 +184,27 @@ async function deterministicPolicyNode(state: typeof FinanceControllerState.Stat
   };
 }
 
+// NODE 5: Optional Groq review. It can veto, never override deterministic failure.
+async function llmPolicyReviewNode(state: typeof FinanceControllerState.State) {
+  const deterministicPolicy = evaluatePolicyRules(state.exceptionCase, state.guardrails);
+  const review = await reviewPolicyWithGroq(state.exceptionCase, state.guardrails, deterministicPolicy);
+  const log: LangGraphNodeLog = {
+    nodeId: 'llmPolicyReviewNode',
+    nodeName: 'Groq LLM Policy Review Node',
+    timestamp: new Date().toISOString(),
+    status: review.available ? review.approved ? 'SUCCESS' : 'WARNING' : 'PAUSED',
+    outputSummary: review.available ? `LLM policy review: ${review.decision}. ${review.reason}` : 'LLM unavailable; deterministic policy remains authoritative.',
+    latencyMs: 0,
+    stateSnapshot: {
+      stage: 'LLM_POLICY_REVIEWED',
+      activeAgents: ['GroqPolicyReviewer'],
+      confidence: state.exceptionCase.aiConfidence,
+      decision: review.decision,
+    },
+  };
+  return { stage: 'FINAL_ROUTING', llmPolicyReview: review, logs: [log] };
+}
+
 // NODE 5: Auto-Resolve Execution Node
 async function executeResolutionNode(_state: typeof FinanceControllerState.State) {
   const startTime = Date.now();
@@ -231,7 +257,8 @@ async function blockExceptionNode(state: typeof FinanceControllerState.State) {
 
 // Conditional Routing Edge Function
 function policyRoutingEdge(state: typeof FinanceControllerState.State) {
-  if (state.policyResult.authorized && state.policyResult.action === 'AUTO_RESOLVE') {
+  const llmAllowsResolution = !state.llmPolicyReview.available || state.llmPolicyReview.approved;
+  if (state.policyResult.authorized && state.policyResult.action === 'AUTO_RESOLVE' && llmAllowsResolution) {
     return 'executeResolutionNode';
   }
   return 'blockExceptionNode';
@@ -243,6 +270,7 @@ const workflow = new StateGraph(FinanceControllerState)
   .addNode('triAgentNode', triAgentNode)
   .addNode('auditorGateNode', auditorGateNode)
   .addNode('deterministicPolicyNode', deterministicPolicyNode)
+  .addNode('llmPolicyReviewNode', llmPolicyReviewNode)
   .addNode('executeResolutionNode', executeResolutionNode)
   .addNode('blockExceptionNode', blockExceptionNode)
 
@@ -250,7 +278,8 @@ const workflow = new StateGraph(FinanceControllerState)
   .addEdge('ingestionNode', 'triAgentNode')
   .addEdge('triAgentNode', 'auditorGateNode')
   .addEdge('auditorGateNode', 'deterministicPolicyNode')
-  .addConditionalEdges('deterministicPolicyNode', policyRoutingEdge, {
+  .addEdge('deterministicPolicyNode', 'llmPolicyReviewNode')
+  .addConditionalEdges('llmPolicyReviewNode', policyRoutingEdge, {
     executeResolutionNode: 'executeResolutionNode',
     blockExceptionNode: 'blockExceptionNode',
   })
@@ -276,6 +305,7 @@ export async function runLangGraphExecutionTrace(
     triAgentResults: { rootCauseDiagnosis: '', merchantContextMatches: 0, feeTaxValid: true },
     auditorTelemetry: { challengerPassed: true, confidenceScore: caseItem.aiConfidence, challengeNote: '' },
     policyResult: { authorized: false, action: 'HUMAN_REVIEW', notes: [] },
+    llmPolicyReview: { available: false, approved: false, decision: 'HUMAN_REVIEW', risk: 'HIGH', reason: 'LLM review pending.', checks: [], provider: 'deterministic-only' },
     logs: [],
   });
 
@@ -292,6 +322,8 @@ export async function runLangGraphExecutionTrace(
       nextEdge: isCompleted ? 'END' : 'HumanReviewApprovalGate',
       memoryVectorsMatched: finalState.triAgentResults.merchantContextMatches,
       policyPassed: finalState.policyResult.authorized,
+      llmPolicyApproved: finalState.llmPolicyReview.approved,
+      llmPolicyUsed: finalState.llmPolicyReview.available,
     },
   };
 }

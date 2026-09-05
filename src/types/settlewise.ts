@@ -156,6 +156,12 @@ export interface BenchmarkMetrics {
   correctActionDecisions: number;
   falsePositiveRate: number;
   safeEscalationRate: number;
+  pipelineExecuted: boolean;
+  graphNodesExecuted: number;
+  langfuseTracesAttempted: number;
+  langfuseTracesSucceeded: number;
+  langfuseTracesFailed: number;
+  langfuseError?: string;
 }
 
 export interface InstitutionalPattern {
@@ -192,5 +198,7 @@ export interface LangGraphTelemetry {
     nextEdge: string;
     memoryVectorsMatched: number;
     policyPassed: boolean;
+    llmPolicyApproved?: boolean;
+    llmPolicyUsed?: boolean;
   };
 }
