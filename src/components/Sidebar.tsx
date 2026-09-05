@@ -2,8 +2,9 @@ import React from 'react';
 import { ActiveView } from '../App';
 import {
   LayoutDashboard, AlertTriangle, DollarSign, Sliders,
-  Database, Play, ChevronRight, Sun, Moon, ShieldCheck
+  Play, ChevronRight, Sun, Moon, ShieldCheck
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
   activeView: ActiveView;
@@ -14,7 +15,7 @@ interface SidebarProps {
   onToggleTheme: () => void;
 }
 
-type NavItem = { id: ActiveView; label: string; icon: React.FC<{ size?: number }> };
+type NavItem = { id: ActiveView; label: string; icon: LucideIcon };
 
 const CONTROL_NAV: NavItem[] = [
   { id: 'command-center', label: 'Command Center', icon: LayoutDashboard },

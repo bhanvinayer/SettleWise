@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { ExceptionCase, BenchmarkMetrics } from '../types/settlewise';
 import {
-  AlertTriangle, CheckCircle2, DollarSign, TrendingDown,
-  ChevronRight, Search, Filter, ArrowUpRight
+  TrendingDown, ChevronRight, Search, ArrowUpRight
 } from 'lucide-react';
 
 interface CommandCenterProps {
