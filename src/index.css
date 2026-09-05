@@ -27,6 +27,8 @@
   --warning-bg:    #fffbeb;
   --danger:        #dc2626;
   --danger-bg:     #fef2f2;
+  --text:          var(--text-primary);
+  --surface-bg:    var(--surface);
   --sidebar-w:     220px;
 }
 
@@ -50,6 +52,8 @@
   --warning-bg:    #2d1f00;
   --danger:        #f87171;
   --danger-bg:     #2d0a0a;
+  --text:          var(--text-primary);
+  --surface-bg:    var(--surface);
 }
 
 /* ─── Base ────────────────────────────────────────────────────────────────── */
@@ -72,6 +76,41 @@
 
   /* Tabular numerals for all money values */
   .tabular { font-variant-numeric: tabular-nums; }
+}
+
+/* Landing page light-mode readability. Dark mode keeps its existing palette. */
+html:not(.dark) .landing-page .text-white,
+html:not(.dark) .landing-page .text-slate-200,
+html:not(.dark) .landing-page .text-slate-300 {
+  color: var(--text-primary) !important;
+}
+
+html:not(.dark) .landing-page .text-slate-400,
+html:not(.dark) .landing-page .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+html:not(.dark) .landing-page .text-indigo-300,
+html:not(.dark) .landing-page .text-indigo-400 {
+  color: var(--brand) !important;
+}
+
+html:not(.dark) .landing-page [class*="bg-slate-900"],
+html:not(.dark) .landing-page [class*="bg-slate-950"],
+html:not(.dark) .landing-page [class*="bg-[#080b12]"] {
+  background: var(--surface-2) !important;
+}
+
+html:not(.dark) .landing-page [class*="border-slate-"] {
+  border-color: var(--border) !important;
+}
+
+html:not(.dark) .landing-page [class*="text-emerald-400"] {
+  color: #126b48 !important;
+}
+
+html:not(.dark) .landing-page [class*="text-amber-400"] {
+  color: #8a5a00 !important;
 }
 
 /* ─── Layout ──────────────────────────────────────────────────────────────── */

@@ -8,6 +8,7 @@ interface CommandCenterProps {
   cases: ExceptionCase[];
   metrics: BenchmarkMetrics;
   activeCategoryFilter: string | null;
+  searchQuery: string;
   onSelectCase: (c: ExceptionCase) => void;
   onSelectFilter: (f: string | null) => void;
   onOpenRecovery: () => void;
@@ -49,10 +50,9 @@ const fmt = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 const fmtL = (n: number) => `₹${(n / 100000).toFixed(2)}L`;
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
-  cases, metrics, activeCategoryFilter,
+  cases, metrics, activeCategoryFilter, searchQuery,
   onSelectCase, onSelectFilter, onOpenRecovery, onOpenExceptions
 }) => {
-  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Aggregate at-risk amount
@@ -70,7 +70,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   const verified = Math.round(leakage * 0.95);
 
   const filtered = cases.filter(c => {
-    const q = search.toLowerCase();
+    const q = searchQuery.toLowerCase();
     const matchSearch =
       !q ||
       c.id.toLowerCase().includes(q) ||
@@ -184,8 +184,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   className="fin-input"
                   style={{ paddingLeft: 26, width: 160 }}
                   placeholder="Case, merchant…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  value={searchQuery}
+                  readOnly
                 />
               </div>
             </div>
@@ -339,8 +339,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               })}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
-              <span style={{ fontSize: 9, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>Today</span>
-              <span style={{ fontSize: 9, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>+6d</span>
+              <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Today</span>
+              <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>+6d</span>
             </div>
           </div>
 

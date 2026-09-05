@@ -27,6 +27,7 @@ export function App() {
 
   const [selectedCase, setSelectedCase] = useState<ExceptionCase | null>(null);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [showReplayModal, setShowReplayModal] = useState(false);
   const [showHonestModal, setShowHonestModal] = useState(false);
@@ -92,6 +93,11 @@ export function App() {
           onRunBatch={() => setShowReplayModal(true)}
           onOpenPolicy={() => setShowPolicyModal(true)}
           activeView={activeView}
+          searchQuery={searchQuery}
+          onSearchQueryChange={query => {
+            setSearchQuery(query);
+            if (query.trim()) setActiveView('command-center');
+          }}
         />
 
         <div className="content-area">
@@ -100,6 +106,7 @@ export function App() {
               cases={cases}
               metrics={metrics}
               activeCategoryFilter={activeCategoryFilter}
+              searchQuery={searchQuery}
               onSelectCase={setSelectedCase}
               onSelectFilter={setActiveCategoryFilter}
               onOpenRecovery={() => setShowRecoveryModal(true)}

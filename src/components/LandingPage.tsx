@@ -90,7 +90,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchApp }) => {
   const calculatedBlockedCount = simulatedConfidenceThreshold >= 95 ? 18 : 6;
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] font-sans selection:bg-[var(--accent)] selection:text-white flex flex-col relative overflow-hidden">
+    <div className="landing-page min-h-screen bg-[var(--bg)] text-[var(--text)] font-sans selection:bg-[var(--accent)] selection:text-white flex flex-col relative overflow-hidden">
       {/* Subtle Background Glow Beams */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-indigo-600/10 via-indigo-900/5 to-transparent blur-3xl pointer-events-none animate-pulse-glow" />
       <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-emerald-500/5 blur-3xl pointer-events-none" />
