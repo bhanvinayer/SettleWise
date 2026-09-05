@@ -19,12 +19,12 @@ export const Header: React.FC<HeaderProps> = ({
   honestExceptionsCount
 }) => {
   return (
-    <header className="border-b border-slate-800/80 bg-[#0c0e17]/95 backdrop-blur-xl sticky top-0 z-40 px-4 lg:px-8 py-3">
+    <header className="border-b border-slate-800/80 bg-[var(--surface-bg)]/95 backdrop-blur-xl sticky top-0 z-40 px-4 lg:px-8 py-3">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-        
+
         {/* Brand & Track Identification */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-          <div 
+          <div
             onClick={onOpenLanding}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Operational Toolbar */}
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          
+
           <button
             onClick={onOpenHonestExceptions}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/15 text-amber-300 border border-amber-500/25 text-xs font-medium transition-all"

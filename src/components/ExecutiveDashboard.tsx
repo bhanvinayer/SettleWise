@@ -15,7 +15,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 }) => {
   return (
     <div className="space-y-4 mb-6">
-      
+
       {/* Top Banner Tagline */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl surface-card border border-slate-800/80">
         <div>
@@ -37,7 +37,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        
+
         {/* Card 1: Processed Volume */}
         <div className="surface-card surface-card-hover p-4 rounded-xl">
           <div className="flex items-center justify-between text-slate-400 mb-2">
@@ -87,11 +87,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         </div>
 
         {/* Card 4: Safely Escalated / Honest Exceptions */}
-        <div 
+        <div
           onClick={() => onSelectCategoryFilter(activeFilter === 'BLOCKED' ? null : 'BLOCKED')}
-          className={`surface-card surface-card-hover p-4 rounded-xl cursor-pointer border transition-all ${
-            activeFilter === 'BLOCKED' ? 'border-amber-500/50 bg-amber-500/5' : ''
-          }`}
+          className={`surface-card surface-card-hover p-4 rounded-xl cursor-pointer border transition-all ${activeFilter === 'BLOCKED' ? 'border-amber-500/50 bg-amber-500/5' : ''
+            }`}
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-[11px] font-medium tracking-wide uppercase text-slate-400">Honest Blocked</span>
@@ -124,11 +123,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         </div>
 
         {/* Card 6: Money Leakage Recovered */}
-        <div 
+        <div
           onClick={() => onSelectCategoryFilter(activeFilter === 'RECOVERING' ? null : 'RECOVERING')}
-          className={`surface-card surface-card-hover p-4 rounded-xl cursor-pointer border transition-all ${
-            activeFilter === 'RECOVERING' ? 'border-emerald-500/50 bg-emerald-500/5' : ''
-          }`}
+          className={`surface-card surface-card-hover p-4 rounded-xl cursor-pointer border transition-all ${activeFilter === 'RECOVERING' ? 'border-emerald-500/50 bg-emerald-500/5' : ''
+            }`}
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-[11px] font-medium tracking-wide uppercase text-slate-400">Leakage Found</span>
