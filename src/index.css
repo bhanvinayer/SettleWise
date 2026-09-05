@@ -376,6 +376,17 @@
   background: var(--bg-secondary);
 }
 
+.drawer-tabs {
+  flex-wrap: wrap;
+  row-gap: 2px;
+  align-items: flex-end;
+}
+
+.drawer-tabs button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .drawer-body {
   flex: 1;
   overflow-y: auto;

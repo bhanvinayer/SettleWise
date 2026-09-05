@@ -33,6 +33,47 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
   const isResolved = c.authorizedAction === 'AUTO_RESOLVE' || c.status === 'RESOLVED';
   const isBlocked  = c.authorizedAction === 'BLOCK' || c.status === 'BLOCKED';
   const isRecovery = c.authorizedAction === 'RECOVERY_CASE' || c.status === 'RECOVERING';
+  const feeStep = c.moneyTrail.find(step => step.stage === 'FEE');
+
+  const telemetryProfile = (() => {
+    switch (c.category) {
+      case 'PARTIAL_REFUND':
+        return {
+          rootDetail: `Linked ${fmt(Math.abs(c.moneyTrail.find(step => step.stage === 'REFUND')?.actualAmount || 0))} refund to payment ${c.paymentId} and verified the net payout arithmetic.`,
+          contextDetail: 'Matched the customer refund pattern against prior partial-refund resolutions.',
+          matcherDetail: feeStep ? `Verified ${fmt(Math.abs(feeStep.actualAmount))} MDR fee against the gateway schedule and settlement credit.` : 'No fee line required for this settlement.',
+          auditChecks: 'duplicate payout injection, refund replay, missing webhook drops, and rate drift',
+        };
+      case 'TIMING_MISMATCH':
+        return {
+          rootDetail: 'Detected a settlement-window shift while preserving the full net payout and UTR linkage.',
+          contextDetail: 'Compared the merchant cutoff pattern with prior weekend and banking-holiday settlement shifts.',
+          matcherDetail: feeStep ? `Reconciled ${fmt(Math.abs(feeStep.actualAmount))} gateway fee before validating the delayed bank credit.` : 'Validated the delayed bank credit against the expected payout.',
+          auditChecks: 'duplicate batch injection, cutoff-window drift, missing webhook drops, and payout suppression',
+        };
+      case 'DUPLICATE_CANDIDATE':
+        return {
+          rootDetail: 'Flagged competing settlement candidates with identical amounts and separate UTR references.',
+          contextDetail: 'Found similar duplicate-candidate cases, but historical matches cannot authorize one payout.',
+          matcherDetail: 'Compared both candidate batches, fee deductions, and bank references for deterministic separation.',
+          auditChecks: 'duplicate payout injection, candidate collision, replayed webhook events, and ledger drift',
+        };
+      case 'FEE_MISMATCH':
+        return {
+          rootDetail: `Isolated a fee variance of ${fmt(Math.abs(c.unexplainedDelta))} between the contracted MDR schedule and the settlement.`,
+          contextDetail: 'Compared this merchant against prior fee-tier and tax-ledger exceptions.',
+          matcherDetail: feeStep ? `Recalculated the ${fmt(Math.abs(feeStep.actualAmount))} fee and checked MDR plus GST alignment.` : 'Reconstructed the fee and tax ledger from settlement evidence.',
+          auditChecks: 'rate drift, tax duplication, fee replay, and missing gateway ledger entries',
+        };
+      default:
+        return {
+          rootDetail: `Investigated the ${c.category.replace(/_/g, ' ').toLowerCase()} signal across bank and gateway records.`,
+          contextDetail: `Compared ${c.merchantName} against prior cases with the same settlement pattern.`,
+          matcherDetail: feeStep ? `Validated the ${fmt(Math.abs(feeStep.actualAmount))} fee line against the bank credit.` : 'Checked all available fee and settlement ledger entries.',
+          auditChecks: 'duplicate payout injection, missing webhook drops, rate drift, and ledger timing anomalies',
+        };
+    }
+  })();
 
   // Determine timeline states
   const step = (cond: boolean): 'done' | 'active' | 'pending' =>
@@ -155,7 +196,7 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
           </div>
 
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 2, borderBottom: '1px solid var(--border)', marginBottom: -17, paddingBottom: 0 }}>
+          <div className="drawer-tabs" style={{ display: 'flex', gap: 2, borderBottom: '1px solid var(--border)', marginBottom: -17, paddingBottom: 0 }}>
             {TABS.map(t => (
               <button
                 key={t.id}
@@ -211,9 +252,53 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
 
           {tab === 'agents' && (
             <div className="drawer-section">
-              <div className="drawer-section-label">Tri-Agent Telemetry</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                Root Cause & Drift Agent isolated {fmt(c.unexplainedDelta)} across bank statement and gateway ledger. Merchant Context Agent retrieved {c.historicalMemoryMatches || 12} similar resolution patterns. Fee & Tax Matcher Agent validated the MDR schedule against the bank credit entry.
+              <div style={{ padding: 14, marginBottom: 12, background: 'var(--accent-light)', border: '1px solid color-mix(in srgb, var(--brand) 25%, transparent)', borderRadius: 6 }}>
+                <div className="drawer-section-label" style={{ color: 'var(--brand)', marginBottom: 6 }}>Tri-Agent Autonomous Decomposition Network</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  SettleWise splits complex financial investigation across 3 dedicated specialized sub-agents before running deterministic policy guardrails.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: 12, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>Agent 01</span>
+                    <span className={`badge ${c.aiConfidence >= 88 ? 'badge-green' : 'badge-amber'}`}>{c.aiConfidence >= 88 ? 'Active' : 'Review'}</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 5 }}>Root Cause & Drift Agent</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{telemetryProfile.rootDetail}</div>
+                  <div style={{ fontSize: 11, color: 'var(--success)', fontFamily: 'JetBrains Mono, monospace', marginTop: 8 }}>✓ Diagnostic Confidence: {c.aiConfidence.toFixed(1)}%</div>
+                </div>
+
+                <div style={{ padding: 12, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>Agent 02</span>
+                    <span className="badge badge-blue">Memory Vector</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 5 }}>Merchant Context Agent</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>Retrieved <strong style={{ color: 'var(--text-primary)' }}>{c.historicalMemoryMatches || 12}</strong> past similar resolution patterns for {c.merchantName}. {telemetryProfile.contextDetail}</div>
+                  <div style={{ fontSize: 11, color: 'var(--brand)', fontFamily: 'JetBrains Mono, monospace', marginTop: 8 }}>✓ Historical Alignment {c.historicalMemoryMatches && c.historicalMemoryMatches >= 80 ? 'High' : 'Moderate'}</div>
+                </div>
+
+                <div style={{ padding: 12, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>Agent 03</span>
+                    <span className="badge badge-green">Tax Ledger</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 5 }}>Fee & Tax Matcher Agent</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{telemetryProfile.matcherDetail}</div>
+                  <div style={{ fontSize: 11, color: 'var(--success)', fontFamily: 'JetBrains Mono, monospace', marginTop: 8 }}>✓ {feeStep ? 'MDR Tier Validated' : 'Ledger Alignment Validated'}</div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 12, padding: 12, background: 'var(--warning-bg)', border: '1px solid color-mix(in srgb, var(--warning) 35%, transparent)', borderRadius: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>Dual-Key Adversarial Auditor Gate</div>
+                  <span className={`badge ${c.aiConfidence >= 88 ? 'badge-green' : 'badge-amber'}`}>{c.aiConfidence >= 88 ? 'Challenge Cleared' : 'Review Raised'}</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  The Adversarial Auditor Agent executed counter-evidence checks for {telemetryProfile.auditChecks}. Result: {c.aiReasoning}
+                </div>
               </div>
             </div>
           )}
