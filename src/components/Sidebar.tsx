@@ -18,7 +18,7 @@ type NavItem = { id: ActiveView; label: string; icon: React.FC<{ size?: number }
 
 const CONTROL_NAV: NavItem[] = [
   { id: 'command-center', label: 'Command Center', icon: LayoutDashboard },
-  { id: 'exceptions',     label: 'Honest Exceptions', icon: AlertTriangle },
+  { id: 'exceptions',     label: 'Exceptions', icon: AlertTriangle },
 ];
 
 const MONEY_NAV: NavItem[] = [

@@ -29,11 +29,11 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-6 overflow-y-auto">
-      <div className="bg-[#0b0f19] border border-blue-500/40 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-6 overflow-y-auto theme-modal">
+      <div className="bg-[#0b0f19] border border-blue-500/40 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden theme-modal-panel">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 bg-blue-950/20 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-800 bg-blue-950/20 flex items-center justify-between theme-modal-header">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/30">
               <Play className="w-6 h-6 fill-current" />
@@ -168,7 +168,7 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
                       <td className="py-2.5 px-4 text-right font-bold text-emerald-400">{currentMetrics.autoResolvePrecision}%</td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-4">Exceptions safely escalated (Honest exceptions)</td>
+                      <td className="py-2.5 px-4">Exceptions safely escalated</td>
                       <td className="py-2.5 px-4 text-right font-bold text-amber-300">{currentMetrics.safelyEscalatedCount}</td>
                     </tr>
                     <tr>
@@ -200,7 +200,7 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-[#080b12] text-right">
+        <div className="px-6 py-3 border-t border-slate-800 bg-[#080b12] text-right theme-modal-footer">
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"

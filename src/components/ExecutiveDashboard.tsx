@@ -86,7 +86,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
         </div>
 
-        {/* Card 4: Safely Escalated / Honest Exceptions */}
+        {/* Card 4: Safely Escalated / Exceptions */}
         <div
           onClick={() => onSelectCategoryFilter(activeFilter === 'BLOCKED' ? null : 'BLOCKED')}
           className={`surface-card surface-card-hover p-4 rounded-xl cursor-pointer border transition-all ${activeFilter === 'BLOCKED' ? 'border-amber-500/50 bg-amber-500/5' : ''

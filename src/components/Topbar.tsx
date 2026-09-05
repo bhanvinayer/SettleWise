@@ -12,7 +12,7 @@ interface TopbarProps {
 
 const VIEW_LABELS: Record<ActiveView, string> = {
   'command-center': 'Command Center',
-  'exceptions':     'Honest Exceptions',
+  'exceptions':     'Exceptions',
   'recoveries':     'Money Recovery',
   'policy':         'Policy Simulator',
   'batch-runs':     'Batch Runs',

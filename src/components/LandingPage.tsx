@@ -117,7 +117,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchApp }) => {
           <div className="flex items-center gap-3">
             <button onClick={() => onLaunchApp('HONEST')} className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-300 transition-all font-mono px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              <span>Honest Exceptions</span>
+              <span>Exceptions</span>
             </button>
             <button onClick={() => onLaunchApp('DASHBOARD')} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all group">
               <span>Launch Controller Terminal</span>
@@ -322,12 +322,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchApp }) => {
           <div className="surface-card surface-card-hover p-6 rounded-2xl border border-slate-800/80 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-mono font-bold text-sm">04</div>
             <h4 className="text-base font-bold text-white">Synthetic Replay Suite</h4>
-            <p className="text-xs text-slate-400 leading-relaxed font-sans">Simulate 50 to 10,000 transaction batches with ground truth to measure precision, recall, and honest exception stopping rates in real time.</p>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">Simulate 50 to 10,000 transaction batches with ground truth to measure precision, recall, and exception stopping rates in real time.</p>
           </div>
           {/* Pillar 5 */}
           <div className="surface-card surface-card-hover p-6 rounded-2xl border border-slate-800/80 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-mono font-bold text-sm">05</div>
-            <h4 className="text-base font-bold text-white">Honest Exception List</h4>
+            <h4 className="text-base font-bold text-white">Exception List</h4>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">Explicitly isolates ambiguous cases (like duplicate payout candidates) to protect the ledger against double reconciliation errors.</p>
           </div>
           {/* Pillar 6 */}

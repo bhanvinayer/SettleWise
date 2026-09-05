@@ -417,6 +417,125 @@
   gap: 8px;
 }
 
+/* Modal surfaces used by the operational views. */
+.theme-modal-panel {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .theme-modal {
+  background: rgba(15, 23, 42, 0.28);
+}
+
+[data-theme="light"] .theme-modal-panel {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+[data-theme="light"] .theme-modal-header,
+[data-theme="light"] .theme-modal-footer {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="bg-slate-950"],
+[data-theme="light"] .theme-modal-panel [class*="bg-slate-900"],
+[data-theme="light"] .theme-modal-panel [class*="bg-[#080b12]"] {
+  background: var(--surface-2) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="border-slate-"] {
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="text-white"],
+[data-theme="light"] .theme-modal-panel [class*="text-slate-200"],
+[data-theme="light"] .theme-modal-panel [class*="text-slate-300"] {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="text-slate-400"] {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="bg-slate-800"] {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="hover:bg-slate-700"]:hover {
+  background: var(--border) !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="hover:text-white"]:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Keep operational accents opaque and readable on white surfaces. */
+[data-theme="light"] .theme-modal-panel [class*="bg-amber-500/"] {
+  background: #9a6700 !important;
+  color: #ffffff !important;
+  border-color: #805500 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="bg-emerald-500/"] {
+  background: #147a52 !important;
+  color: #ffffff !important;
+  border-color: #0f6342 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="bg-blue-500/"] {
+  background: #1d4f91 !important;
+  color: #ffffff !important;
+  border-color: #173f73 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="bg-blue-600"],
+[data-theme="light"] .theme-modal-panel [class*="bg-gradient-to-r"] {
+  background: #1d4f91 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #173f73 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="hover:bg-amber-500/"]:hover {
+  background: #7f5400 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="hover:bg-emerald-500"]:hover {
+  background: #0f6342 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="hover:from-blue-500"]:hover,
+[data-theme="light"] .theme-modal-panel [class*="hover:bg-blue-500"]:hover {
+  background: #173f73 !important;
+  background-image: none !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="text-amber-400"],
+[data-theme="light"] .theme-modal-panel [class*="text-amber-300"] {
+  color: #8a5a00 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="text-emerald-400"],
+[data-theme="light"] .theme-modal-panel [class*="text-emerald-300"] {
+  color: #126b48 !important;
+}
+
+[data-theme="light"] .theme-modal-panel [class*="text-blue-400"],
+[data-theme="light"] .theme-modal-panel [class*="text-blue-300"],
+[data-theme="light"] .theme-modal-panel [class*="text-indigo-400"],
+[data-theme="light"] .theme-modal-panel [class*="text-indigo-300"] {
+  color: #1d4f91 !important;
+}
+
+[data-theme="light"] .theme-modal-panel[class] [class*="bg-amber-500/"][class*="text-amber-"],
+[data-theme="light"] .theme-modal-panel[class] [class*="bg-emerald-500/"][class*="text-emerald-"],
+[data-theme="light"] .theme-modal-panel[class] [class*="bg-blue-500/"][class*="text-blue-"] {
+  color: #ffffff !important;
+}
+
 /* ─── Timeline Steps ──────────────────────────────────────────────────────── */
 .timeline-step {
   display: flex;

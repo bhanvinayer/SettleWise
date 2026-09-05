@@ -381,7 +381,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             {[
               { label: 'Processed',        value: metrics.totalRecords, mono: true },
               { label: 'Auto-Resolved',    value: metrics.autoResolveCount, mono: true },
-              { label: 'Honest Exceptions',value: metrics.safelyEscalatedCount, mono: true },
+              { label: 'Exceptions',value: metrics.safelyEscalatedCount, mono: true },
               { label: 'Precision',        value: `${metrics.autoResolvePrecision}%`, mono: true },
               { label: 'Accuracy',         value: `${metrics.diagnosisPrecision}%`, mono: true },
             ].map(row => (

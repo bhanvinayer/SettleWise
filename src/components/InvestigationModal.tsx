@@ -369,11 +369,11 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
                   },
                   {
                     nodeId: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'executeResolutionNode' : 'blockExceptionNode',
-                    nodeName: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? '05. Auto-Resolution Execution Terminal Node' : '05. Honest Exception Quarantine Terminal Node',
+                    nodeName: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? '05. Auto-Resolution Execution Terminal Node' : '05. Exception Quarantine Terminal Node',
                     status: exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'SUCCESS' : 'PAUSED',
                     output: exceptionCase.authorizedAction === 'AUTO_RESOLVE'
                       ? 'Graph reached terminal state: Auto-resolution executed & ledger updated.'
-                      : 'Graph state paused at Honest Exception Quarantine node awaiting human operator authorization.',
+                      : 'Graph state paused at Exception Quarantine node awaiting human operator authorization.',
                     latencyMs: 45,
                     activeAgents: [exceptionCase.authorizedAction === 'AUTO_RESOLVE' ? 'LedgerWriterNode' : 'QuarantineControllerNode']
                   }
@@ -448,7 +448,7 @@ export const InvestigationModal: React.FC<InvestigationModalProps> = ({
                 <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/40 text-xs space-y-1">
                   <h4 className="font-bold text-amber-400 uppercase font-mono flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4" />
-                    Honest Exception Safeguard Explanation
+                    Exception Safeguard Explanation
                   </h4>
                   <p className="text-amber-200">{exceptionCase.honestExceptionReason}</p>
                 </div>

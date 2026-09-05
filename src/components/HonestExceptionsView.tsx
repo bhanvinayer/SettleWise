@@ -18,18 +18,18 @@ export const HonestExceptionsView: React.FC<HonestExceptionsViewProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-6 overflow-y-auto">
-      <div className="bg-[#0b0f19] border border-amber-500/40 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-6 overflow-y-auto theme-modal">
+      <div className="bg-[#0b0f19] border border-amber-500/40 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden theme-modal-panel">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 bg-amber-950/20 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-800 bg-amber-950/20 flex items-center justify-between theme-modal-header">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2 font-sans">
-                <span>Razorpay Buildathon — Honest Exception Safeguard List</span>
+                <span>Razorpay Buildathon — Exception Safeguard List</span>
                 <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   {honestCases.length} Cases Safely Blocked
                 </span>
@@ -73,7 +73,7 @@ export const HonestExceptionsView: React.FC<HonestExceptionsViewProps> = ({
           &ldquo;An AI finance system that auto-resolves 100% of cases is unsafe. Real financial systems require stopping rules. SettleWise isolates ambiguity and routes dangerous cases to human operators with complete evidence.&rdquo;
         </div>
 
-        {/* List of Honest Exceptions */}
+        {/* List of Exceptions */}
         <div className="p-6 overflow-y-auto space-y-4 flex-1">
           {honestCases.map((c) => (
             <div
@@ -128,7 +128,7 @@ export const HonestExceptionsView: React.FC<HonestExceptionsViewProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-[#080b12] text-right">
+        <div className="px-6 py-3 border-t border-slate-800 bg-[#080b12] text-right theme-modal-footer">
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
