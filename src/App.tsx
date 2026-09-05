@@ -80,7 +80,19 @@ export function App() {
       })
     );
     if (selectedCase?.id === caseId) {
-      setSelectedCase(prev => prev ? { ...prev, authorizedAction: newAction } : null);
+      setSelectedCase(prev => {
+        if (!prev) return null;
+        const status =
+          newAction === 'AUTO_RESOLVE' ? 'RESOLVED' :
+          newAction === 'RECOVERY_CASE' ? 'RECOVERING' :
+          newAction === 'BLOCK' ? 'BLOCKED' : 'ESCALATED';
+        return {
+          ...prev,
+          authorizedAction: newAction,
+          status,
+          ruleValidationNotes: [...prev.ruleValidationNotes, `[Operator]: ${note}`],
+        };
+      });
     }
   };
 

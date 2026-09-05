@@ -637,3 +637,13 @@ html:not(.dark) .landing-page [class*="text-amber-400"] {
 
 /* ─── Money value helper ──────────────────────────────────────────────────── */
 .money { font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
+
+.money-trail-summary {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+.money-trail-payment { color: var(--text-primary); }
+.money-trail-refund { color: var(--danger); }
+.money-trail-fee { color: var(--warning); }
+.money-trail-payout { color: var(--success); }

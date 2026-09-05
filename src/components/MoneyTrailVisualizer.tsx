@@ -119,24 +119,24 @@ export const MoneyTrailVisualizer: React.FC<MoneyTrailVisualizerProps> = ({
 
       {/* Calculation Summary Bar */}
       {!compact && (
-        <div className="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-400 bg-slate-900/40 px-3 py-2 rounded-lg">
+        <div className="money-trail-summary mt-4 pt-3 border-t flex flex-wrap items-center justify-between gap-2 text-xs font-mono px-3 py-2 rounded-lg">
           <div>
-            <span>Initial Payment: <strong className="text-white">₹{paymentAmount.toLocaleString('en-IN')}</strong></span>
+            <span>Initial Payment: <strong className="money-trail-payment">₹{paymentAmount.toLocaleString('en-IN')}</strong></span>
           </div>
           <div className="flex items-center gap-3">
             {steps.filter(s => s.stage === 'REFUND').map((s, i) => (
-              <span key={i} className="text-rose-400">
+              <span key={i} className="money-trail-refund">
                 Refund: -₹{Math.abs(s.actualAmount).toLocaleString('en-IN')}
               </span>
             ))}
             {steps.filter(s => s.stage === 'FEE').map((s, i) => (
-              <span key={i} className="text-amber-400">
+              <span key={i} className="money-trail-fee">
                 Fee: -₹{Math.abs(s.actualAmount).toLocaleString('en-IN')}
               </span>
             ))}
           </div>
           <div>
-            <span>Net Payout: <strong className="text-emerald-400">₹{steps[steps.length - 1]?.actualAmount?.toLocaleString('en-IN') || 0}</strong></span>
+            <span>Net Payout: <strong className="money-trail-payout">₹{steps[steps.length - 1]?.actualAmount?.toLocaleString('en-IN') || 0}</strong></span>
           </div>
         </div>
       )}

@@ -9,6 +9,15 @@ export interface CounterfactualPipelineResult {
   cases: ExceptionCase[];
 }
 
+export interface PipelineProgress {
+  index: number;
+  total: number;
+  caseId: string;
+  merchantName: string;
+  status: 'RUNNING' | 'COMPLETED' | 'FAILED';
+  decision?: string;
+}
+
 export function runCounterfactualReplayBenchmark(
   batchSize: number = 50,
   guardrails: PolicyGuardrails = DEFAULT_POLICY_GUARDRAILS,
@@ -134,7 +143,8 @@ function inferCategoryFromEvidence(caseItem: ExceptionCase): ExceptionCase['cate
 export async function runCounterfactualReplayPipeline(
   batchSize: number = 50,
   guardrails: PolicyGuardrails = DEFAULT_POLICY_GUARDRAILS,
-  replaySeed: string = 'SW-TRACK04-001'
+  replaySeed: string = 'SW-TRACK04-001',
+  onProgress?: (progress: PipelineProgress) => void
 ): Promise<CounterfactualPipelineResult> {
   const cases = generateSyntheticBatch(batchSize, replaySeed);
   const startedAt = performance.now();
@@ -147,7 +157,17 @@ export async function runCounterfactualReplayPipeline(
   // Execute the same StateGraph used by transaction inspection, in bounded groups.
   for (let offset = 0; offset < cases.length; offset += 50) {
     const group = cases.slice(offset, offset + 50);
-    const traces = await Promise.all(group.map(caseItem => runLangGraphExecutionTrace(caseItem, guardrails)));
+    group.forEach((caseItem, index) => onProgress?.({ index: offset + index, total: cases.length, caseId: caseItem.id, merchantName: caseItem.merchantName, status: 'RUNNING' }));
+    const traces = await Promise.all(group.map(async (caseItem, index) => {
+      try {
+        const trace = await runLangGraphExecutionTrace(caseItem, guardrails);
+        onProgress?.({ index: offset + index, total: cases.length, caseId: caseItem.id, merchantName: caseItem.merchantName, status: 'COMPLETED', decision: trace.stateCheckpoint.policyPassed ? 'AUTO_RESOLVE' : 'HUMAN_REVIEW' });
+        return trace;
+      } catch (error) {
+        onProgress?.({ index: offset + index, total: cases.length, caseId: caseItem.id, merchantName: caseItem.merchantName, status: 'FAILED', decision: error instanceof Error ? error.message : 'Pipeline failed' });
+        throw error;
+      }
+    }));
     traces.forEach((trace, index) => telemetryByCase.set(group[index].id, trace));
     graphNodesExecuted += traces.reduce((count, trace) => count + trace.nodesExecuted.length, 0);
     // Keep observability bounded for 500/1,000/10,000-record evaluations.

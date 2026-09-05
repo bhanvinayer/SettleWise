@@ -79,12 +79,12 @@ export const Topbar: React.FC<TopbarProps> = ({ metrics, onRunBatch, onOpenPolic
 
         <div title="Langfuse trace delivery status" style={{
           display: 'flex', alignItems: 'center', gap: 5, padding: '4px 8px', borderRadius: 5,
-          background: observabilityStatus === 'traced' ? 'var(--success-bg)' : 'var(--surface-2)',
+          background: observabilityStatus === 'unavailable' ? 'var(--warning-bg)' : 'var(--success-bg)',
           border: '1px solid var(--border)', fontSize: 10,
-          color: observabilityStatus === 'traced' ? 'var(--success)' : 'var(--text-muted)',
+          color: observabilityStatus === 'unavailable' ? 'var(--warning)' : 'var(--success)',
           fontFamily: 'JetBrains Mono, monospace',
         }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: observabilityStatus === 'traced' ? 'var(--success)' : 'var(--text-muted)' }} />
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: observabilityStatus === 'unavailable' ? 'var(--warning)' : 'var(--success)' }} />
           Langfuse {observabilityStatus === 'traced' ? 'synced' : observabilityStatus === 'unavailable' ? 'offline' : 'ready'}
         </div>
 

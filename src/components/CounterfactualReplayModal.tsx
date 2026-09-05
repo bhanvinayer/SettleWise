@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BenchmarkMetrics, PolicyGuardrails } from '../types/settlewise';
-import { CounterfactualPipelineResult, runCounterfactualReplayPipeline } from '../engine/counterfactualReplay';
+import { CounterfactualPipelineResult, PipelineProgress, runCounterfactualReplayPipeline } from '../engine/counterfactualReplay';
 import { Play, CheckCircle2, X, RefreshCw } from 'lucide-react';
 
 interface CounterfactualReplayModalProps {
@@ -17,11 +17,20 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
   const [batchSize, setBatchSize] = useState<number>(50);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentMetrics, setCurrentMetrics] = useState<BenchmarkMetrics | null>(null);
+  const [progress, setProgress] = useState<PipelineProgress[]>([]);
 
   const handleExecuteReplay = async () => {
     setIsRunning(true);
+    setProgress([]);
     try {
-      const result = await runCounterfactualReplayPipeline(batchSize, guardrails);
+      const result = await runCounterfactualReplayPipeline(batchSize, guardrails, 'SW-TRACK04-001', nextProgress => {
+        setProgress(current => {
+          const existing = current.find(item => item.caseId === nextProgress.caseId);
+          return existing
+            ? current.map(item => item.caseId === nextProgress.caseId ? nextProgress : item)
+            : [...current, nextProgress];
+        });
+      });
       setCurrentMetrics(result.metrics);
       onApplyBatchResults(result);
     } finally {
@@ -60,6 +69,32 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
           </button>
         </div>
 
+        {isRunning && (
+          <div className="px-6 pb-2 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5">
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="flex items-center justify-between text-xs font-mono text-blue-300 mb-2">
+                <span>Running {batchSize.toLocaleString()} transaction pipeline</span>
+                <span>{progress.filter(item => item.status !== 'RUNNING').length}/{batchSize}</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-full bg-blue-600 transition-all" style={{ width: `${progress.length ? (progress.filter(item => item.status !== 'RUNNING').length / batchSize) * 100 : 0}%` }} />
+              </div>
+            </div>
+            <div className="rounded-xl bg-slate-900 border border-slate-800 p-3 max-h-64 overflow-y-auto">
+              <div className="text-[10px] font-mono uppercase text-slate-400 mb-2">Transaction activity</div>
+              <div className="space-y-1.5">
+                {progress.slice(-40).map(item => (
+                  <div key={item.caseId} className="flex items-center gap-2 text-[10px] font-mono">
+                    <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'COMPLETED' ? 'bg-emerald-400' : item.status === 'FAILED' ? 'bg-rose-400' : 'bg-blue-400 animate-pulse'}`} />
+                    <span className="text-slate-300 truncate flex-1">{item.caseId} · {item.merchantName}</span>
+                    <span className="text-slate-500">{item.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Body Controls */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           
@@ -68,7 +103,7 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono font-semibold text-slate-300">Dataset Batch Size:</span>
               <div className="flex items-center gap-2">
-                {[50, 500, 1000, 10000].map((size) => (
+                {[5, 10, 15, 50, 500, 1000, 10000].map((size) => (
                   <button
                     key={size}
                     onClick={() => setBatchSize(size)}
