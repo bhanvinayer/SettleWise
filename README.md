@@ -22,7 +22,7 @@ Rather than being another basic "AI reconciliation bot" (a feature already built
 
 ---
 
-## 🔥 The 3 Core USPs That Separate SettleWise From Every Submission
+## 🔥 The 3 Core USPs and Three design decisions that define SettleWise
 
 ### 1. 🤺 Adversarial Auditor: "The AI That Tries to Prove Itself Wrong"
 * **The Innovation**: SettleWise does not simply pick the highest-confidence explanation. Before passing a hypothesis to authorization, an independent **Adversarial Auditor Agent** actively attempts to disprove the primary conclusion (testing counter-hypotheses like duplicate payout injection, T+1 settlement timing drift, or un-webhooked refunds).
