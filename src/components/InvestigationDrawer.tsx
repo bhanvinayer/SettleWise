@@ -576,21 +576,23 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
           <button
             className="btn btn-danger btn-sm"
             onClick={() => onUpdateAction(c.id, 'BLOCK', 'Blocked by operator — high risk')}
+            style={isBlocked ? { outline: '2px solid var(--danger)', outlineOffset: 2, opacity: 1 } : undefined}
           >
-            <AlertTriangle size={12} /> Block & Escalate
+            <AlertTriangle size={12} /> Block & Escalate{isBlocked && ' ✓'}
           </button>
           <button
             className="btn btn-ghost btn-sm"
             onClick={() => onUpdateAction(c.id, 'RECOVERY_CASE', 'Recovery ticket created')}
+            style={isRecovery ? { outline: '2px solid var(--brand)', outlineOffset: 2, color: 'var(--brand)' } : undefined}
           >
-            <DollarSign size={12} /> Recovery Ticket
+            <DollarSign size={12} /> Recovery Ticket{isRecovery && ' ✓'}
           </button>
           <button
             className="btn btn-success btn-sm"
-            style={{ marginLeft: 'auto' }}
+            style={{ marginLeft: 'auto', ...(isResolved ? { outline: '2px solid var(--success)', outlineOffset: 2 } : {}) }}
             onClick={() => onUpdateAction(c.id, 'AUTO_RESOLVE', 'Authorized by operator')}
           >
-            <CheckCircle2 size={12} /> Authorize Resolve
+            <CheckCircle2 size={12} /> Authorize Resolve{isResolved && ' ✓'}
           </button>
         </div>
       </div>

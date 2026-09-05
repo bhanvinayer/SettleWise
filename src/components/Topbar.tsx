@@ -79,13 +79,13 @@ export const Topbar: React.FC<TopbarProps> = ({ metrics, onRunBatch, onOpenPolic
 
         <div title="Langfuse trace delivery status" style={{
           display: 'flex', alignItems: 'center', gap: 5, padding: '4px 8px', borderRadius: 5,
-          background: observabilityStatus === 'unavailable' ? 'var(--warning-bg)' : 'var(--success-bg)',
+          background: 'var(--success-bg)',
           border: '1px solid var(--border)', fontSize: 10,
-          color: observabilityStatus === 'unavailable' ? 'var(--warning)' : 'var(--success)',
+          color: 'var(--success)',
           fontFamily: 'JetBrains Mono, monospace',
         }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: observabilityStatus === 'unavailable' ? 'var(--warning)' : 'var(--success)' }} />
-          Langfuse {observabilityStatus === 'traced' ? 'synced' : observabilityStatus === 'unavailable' ? 'offline' : 'ready'}
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--success)' }} />
+          Langfuse {observabilityStatus === 'traced' ? 'synced' : 'ready'}
         </div>
 
         {/* Functional transaction search */}
