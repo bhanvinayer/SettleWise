@@ -113,7 +113,7 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
   const TABS: { id: DrawerTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'trail', label: 'Money Trail' },
-    { id: 'hypotheses', label: `Money TrailAI Hypotheses (${c.hypotheses.length})` },
+    { id: 'hypotheses', label: `AI Hypotheses (${c.hypotheses.length})` },
     { id: 'agents', label: 'Tri-Agent Telemetry' },
     { id: 'langgraph', label: 'LangGraph Machine' },
     { id: 'evidence', label: `Evidence (${c.evidence.length})` },
@@ -237,14 +237,36 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
 
           {tab === 'hypotheses' && (
             <div className="drawer-section">
-              <div className="drawer-section-label">Money TrailAI Hypotheses ({c.hypotheses.length})</div>
+              <div className="drawer-section-label">AI Hypotheses ({c.hypotheses.length})</div>
               {c.hypotheses.map(h => (
                 <div key={h.id} style={{ padding: 12, marginBottom: 8, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
-                    <strong style={{ fontSize: 13 }}>{h.title}</strong>
-                    <span style={{ color: 'var(--success)', fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>{h.confidenceScore.toFixed(1)}%</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--accent-light)', color: 'var(--brand)', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700 }}>{h.id}</span>
+                      <strong style={{ fontSize: 13 }}>{h.title}</strong>
+                    </div>
+                    <span style={{ color: 'var(--success)', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>Confidence: {h.confidenceScore.toFixed(1)}%</span>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{h.explanation}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 10 }}>{h.explanation}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: h.counterEvidence?.length ? '1fr 1fr' : '1fr', gap: 8 }}>
+                    <div style={{ padding: 9, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 5 }}>
+                      <div style={{ fontSize: 10, color: 'var(--success)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, textTransform: 'uppercase', marginBottom: 5 }}>✓ Supporting Factors</div>
+                      {h.supportingFactors.length > 0 ? h.supportingFactors.map(factor => (
+                        <div key={factor} style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>- {factor}</div>
+                      )) : <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>No supporting factors recorded.</div>}
+                    </div>
+                    {h.counterEvidence && h.counterEvidence.length > 0 && (
+                      <div style={{ padding: 9, background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--warning) 25%, transparent)', borderRadius: 5 }}>
+                        <div style={{ fontSize: 10, color: 'var(--warning)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, textTransform: 'uppercase', marginBottom: 5 }}>⚠ Counter Evidence</div>
+                        {h.counterEvidence.map(factor => (
+                          <div key={factor} style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>- {factor}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 9, fontSize: 10, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>
+                    Suggested action: <strong style={{ color: 'var(--brand)', marginLeft: 4 }}>{h.suggestedAction.replace('_', ' ')}</strong>
+                  </div>
                 </div>
               ))}
             </div>

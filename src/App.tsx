@@ -19,7 +19,7 @@ export type ActiveView = 'command-center' | 'exceptions' | 'recoveries' | 'polic
 export function App() {
   const [viewMode, setViewMode] = useState<'LANDING' | 'DASHBOARD'>('LANDING');
   const [activeView, setActiveView] = useState<ActiveView>('command-center');
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const [cases, setCases] = useState<ExceptionCase[]>([]);
   const [metrics, setMetrics] = useState<BenchmarkMetrics | null>(null);
