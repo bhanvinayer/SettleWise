@@ -114,6 +114,13 @@ export const CounterfactualReplayModal: React.FC<CounterfactualReplayModalProps>
                 </span>
               </div>
 
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono text-slate-400">
+                <span>Seed: <strong className="text-slate-200">{currentMetrics.replaySeed}</strong></span>
+                <span>Correct actions: <strong className="text-slate-200">{currentMetrics.correctActionDecisions}/{currentMetrics.totalRecords}</strong></span>
+                <span>False positive rate: <strong className="text-rose-400">{currentMetrics.falsePositiveRate}%</strong></span>
+                <span>Safe escalation: <strong className="text-emerald-400">{currentMetrics.safeEscalationRate}%</strong></span>
+              </div>
+
               {/* Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-center">

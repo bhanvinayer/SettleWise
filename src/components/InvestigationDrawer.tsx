@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExceptionCase, DecisionAction } from '../types/settlewise';
+import { ExceptionCase, DecisionAction, LangGraphTelemetry } from '../types/settlewise';
 import { evaluatePolicyRules } from '../engine/policyEngine';
 import { X, CheckCircle2, AlertTriangle, DollarSign } from 'lucide-react';
 import { MoneyTrailVisualizer } from './MoneyTrailVisualizer';
@@ -8,6 +8,7 @@ interface InvestigationDrawerProps {
   exceptionCase: ExceptionCase;
   onClose: () => void;
   onUpdateAction: (caseId: string, action: DecisionAction, note: string) => void;
+  telemetry: LangGraphTelemetry | null;
 }
 
 type DrawerTab = 'overview' | 'trail' | 'hypotheses' | 'agents' | 'langgraph' | 'evidence' | 'policy';
@@ -25,7 +26,7 @@ function StepDot({ status }: { status: 'done' | 'active' | 'pending' }) {
 }
 
 export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
-  exceptionCase: c, onClose, onUpdateAction
+  exceptionCase: c, onClose, onUpdateAction, telemetry
 }) => {
   const [tab, setTab] = useState<DrawerTab>('overview');
   const policyRes = evaluatePolicyRules(c);
@@ -524,23 +525,20 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
 
           {tab === 'langgraph' && (
             <div className="drawer-section">
-              <div className="drawer-section-label">LangGraph Execution Trace</div>
-              {[
-                { name: '01 — Ingestion Node',          status: 'SUCCESS', ms: 80,  agents: ['LedgerParser'] },
-                { name: '02 — Tri-Agent Sub-Graph',     status: 'SUCCESS', ms: 210, agents: ['RootCause', 'MerchantContext', 'FeeTax'] },
-                { name: '03 — Adversarial Gate',        status: c.aiConfidence >= 88 ? 'SUCCESS' : 'WARNING', ms: 140, agents: ['AdversarialAuditor'] },
-                { name: '04 — Policy Guardrails',       status: policyRes.isAutoResolvePermitted ? 'SUCCESS' : 'PAUSED',  ms: 60,  agents: ['RuleEngine'] },
-                { name: '05 — Terminal Node',           status: isResolved ? 'SUCCESS' : isBlocked ? 'PAUSED' : 'PENDING', ms: 45, agents: [isResolved ? 'LedgerWriter' : 'QuarantineCtrl'] },
-              ].map((node, i) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span>{telemetry ? telemetry.executionStatus.replace('_', ' ') : 'Executing graph...'}</span>
+                <span>{telemetry ? `${telemetry.totalLatencyMs}ms` : '...'}</span>
+              </div>
+              {(telemetry?.nodesExecuted || []).map((node, i) => (
                 <div key={i} style={{
                   padding: '8px 10px', marginBottom: 6, borderRadius: 5,
                   background: 'var(--surface-2)', border: '1px solid var(--border)',
                   fontFamily: 'JetBrains Mono, monospace',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{node.name}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{node.nodeName}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{node.ms}ms</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{node.latencyMs}ms</span>
                       <span style={{
                         fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 3,
                         background: node.status === 'SUCCESS' ? 'var(--success-bg)' : node.status === 'WARNING' ? 'var(--warning-bg)' : 'var(--surface)',
@@ -552,7 +550,7 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
                     </div>
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    {node.agents.map(a => (
+                    {node.stateSnapshot.activeAgents.map(a => (
                       <span key={a} style={{
                         marginRight: 4, padding: '1px 5px', borderRadius: 3,
                         background: 'var(--surface)', border: '1px solid var(--border)',
@@ -560,8 +558,10 @@ export const InvestigationDrawer: React.FC<InvestigationDrawerProps> = ({
                       }}>{a}</span>
                     ))}
                   </div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 5, lineHeight: 1.4 }}>{node.outputSummary}</div>
                 </div>
               ))}
+              {!telemetry && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Running ingestion, tri-agent, auditor, and policy nodes...</div>}
             </div>
           )}
         </div>

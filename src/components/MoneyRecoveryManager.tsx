@@ -14,6 +14,35 @@ export const MoneyRecoveryManager: React.FC<MoneyRecoveryManagerProps> = ({
   const recoveryCases = cases.filter((c) => Boolean(c.recoveryAmount) || c.status === 'RECOVERING');
   const totalLeakage = recoveryCases.reduce((sum, c) => sum + (c.recoveryAmount || 0), 0);
 
+  const downloadClaimPackage = (c: ExceptionCase) => {
+    const claim = {
+      packageType: 'SETTLEWISE_RECOVERY_CLAIM',
+      generatedAt: new Date().toISOString(),
+      exceptionId: c.id,
+      merchant: { id: c.merchantId, name: c.merchantName },
+      paymentId: c.paymentId,
+      amounts: {
+        payment: c.paymentAmount,
+        expectedSettlement: c.expectedSettlement,
+        actualSettlement: c.actualSettlement,
+        recoveryAmount: c.recoveryAmount || 0,
+      },
+      category: c.category,
+      reasoning: c.aiReasoning,
+      recoveryNotes: c.recoveryNotes,
+      evidence: c.evidence,
+      moneyTrail: c.moneyTrail,
+      policyNotes: c.ruleValidationNotes,
+    };
+    const blob = new Blob([JSON.stringify(claim, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `SettleWise_Recovery_${c.id.replace('#', '')}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-6 overflow-y-auto theme-modal">
       <div className="bg-[#0b0f19] border border-emerald-500/40 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden theme-modal-panel">
@@ -83,7 +112,7 @@ export const MoneyRecoveryManager: React.FC<MoneyRecoveryManagerProps> = ({
                   </div>
 
                   <button
-                    onClick={() => alert(`Generated Claim Package for Exception ${c.id}`)}
+                    onClick={() => downloadClaimPackage(c)}
                     className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md"
                   >
                     <Download className="w-3.5 h-3.5" />

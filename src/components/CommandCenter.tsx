@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ExceptionCase, BenchmarkMetrics } from '../types/settlewise';
+import { generateCashForecast } from '../engine/cashForecaster';
 import {
   TrendingDown, ChevronRight, Search, ArrowUpRight
 } from 'lucide-react';
@@ -69,13 +70,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   const claimReady = Math.round(leakage * 0.65);
   const verified = Math.round(leakage * 0.95);
 
-  // Project available cash from the current batch instead of using static demo values.
-  const forecastBase = 42.8 + metrics.totalRupeesReconciled / 10000000;
-  const forecastStep = Math.max(0.35, metrics.totalRupeesReconciled / Math.max(metrics.totalRecords, 1) / 100000);
-  const forecastValues = Array.from({ length: 7 }, (_, day) => {
-    const riskDrag = atRisk / 100000 * (day / 6);
-    return Number((forecastBase + forecastStep * day - riskDrag).toFixed(1));
-  });
+  const cashForecast = generateCashForecast(cases);
+  const forecastValues = cashForecast.dailyProjections.map(projection => Number((projection.netCashPosition / 100000).toFixed(1)));
   const forecastMax = Math.max(...forecastValues);
 
   const filtered = cases.filter(c => {
@@ -327,16 +323,17 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               7-Day Forecast
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4, alignItems: 'end' }}>
-              {forecastValues.map((value, i) => {
+              {cashForecast.dailyProjections.map((projection, i) => {
+                const value = forecastValues[i];
                 const pct = Math.max(16, (value / forecastMax) * 100);
                 return (
-                  <div key={i} style={{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }} title={`Day ${i}: ₹${value.toFixed(1)}L projected cash`}>
+                  <div key={projection.dateStr} style={{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }} title={`${projection.dateStr}: ₹${value.toFixed(1)}L net cash, ${projection.liquidityHealth.toLowerCase()}`}>
                     <span style={{ fontSize: 8, lineHeight: 1, color: i === 0 ? 'var(--brand)' : 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, whiteSpace: 'nowrap' }}>
                       ₹{value.toFixed(1)}L
                     </span>
                     <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'flex-end' }}>
                       <div
-                        aria-label={`${i === 0 ? 'Today' : `Day plus ${i}`} projected cash ₹${value.toFixed(1)} lakh`}
+                        aria-label={`${projection.dayLabel} projected net cash ₹${value.toFixed(1)} lakh`}
                         style={{
                           width: '100%',
                           height: `${pct}%`,
@@ -356,7 +353,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 7, borderTop: '1px solid var(--border)', fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
               <span>Projected range</span>
-              <strong style={{ color: 'var(--text-primary)' }}>₹{forecastValues[0].toFixed(1)}L → ₹{forecastValues[6].toFixed(1)}L</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>₹{forecastValues[0].toFixed(1)}L → ₹{forecastValues[6].toFixed(1)}L · {cashForecast.payoutConfidenceIndex}% confidence</strong>
             </div>
           </div>
 

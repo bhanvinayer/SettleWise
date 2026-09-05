@@ -13,7 +13,24 @@ const MERCHANTS = [
   { id: 'MCH_7719', name: 'Dunzo Express Logistics' },
 ];
 
-export function generateSyntheticBatch(count: number = 50): ExceptionCase[] {
+const REPLAY_CLOCK = Date.parse('2026-09-05T09:00:00.000Z');
+
+let activeRandom = Math.random;
+
+function seededRandom(seed: string) {
+  let state = Array.from(seed).reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 2166136261);
+  return () => {
+    state = (state * 1664525 + 1013904223) | 0;
+    return (state >>> 0) / 4294967296;
+  };
+}
+
+function randomValue() {
+  return activeRandom();
+}
+
+export function generateSyntheticBatch(count: number = 50, seed: string = 'SW-TRACK04-001'): ExceptionCase[] {
+  activeRandom = seededRandom(seed);
   const cases: ExceptionCase[] = [];
 
   // Anchor high-impact predefined cases for full demo fidelity
@@ -29,7 +46,7 @@ export function generateSyntheticBatch(count: number = 50): ExceptionCase[] {
   for (let i = 0; i < remaining; i++) {
     const caseNum = 48300 + i;
     const merchant = MERCHANTS[i % MERCHANTS.length];
-    const categoryRoll = Math.random();
+    const categoryRoll = randomValue();
 
     if (categoryRoll < 0.45) {
       // Standard Easy Exception (Partial refund / Fee)
@@ -45,6 +62,17 @@ export function generateSyntheticBatch(count: number = 50): ExceptionCase[] {
       cases.push(generateRandomAmbiguousCase(caseNum, merchant));
     }
   }
+
+  cases.forEach(caseItem => {
+    const groundTruthAction: ExceptionCase['groundTruthAction'] =
+      caseItem.category === 'DUPLICATE_CANDIDATE' ? 'BLOCK' :
+      caseItem.category === 'FEE_MISMATCH' && caseItem.recoveryAmount ? 'RECOVERY_CASE' :
+      caseItem.category === 'MISSING_SETTLEMENT' || caseItem.aiConfidence < 95 ? 'HUMAN_REVIEW' :
+      'AUTO_RESOLVE';
+    caseItem.groundTruthCategory = caseItem.category;
+    caseItem.groundTruthAction = groundTruthAction;
+    caseItem.groundTruthShouldAutoResolve = groundTruthAction === 'AUTO_RESOLVE';
+  });
 
   return cases;
 }
@@ -102,7 +130,7 @@ function createCase1_EasyException(): ExceptionCase {
       '✓ Zero unexplained financial delta',
       '✓ Policy Authorized: AUTO_RESOLVE'
     ],
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 2).toISOString(),
     historicalMemoryMatches: 84
   };
 }
@@ -156,7 +184,7 @@ function createCase2_SettlementDelay(): ExceptionCase {
       '✓ Zero net financial leakage',
       '✓ Category: Timing Delay Resolved'
     ],
-    createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 5).toISOString(),
     historicalMemoryMatches: 112
   };
 }
@@ -211,7 +239,7 @@ function createCase3_DangerousAmbiguityDuplicate(): ExceptionCase {
       '✓ Safety Escalation Executed: Sent to Human Finance Operator'
     ],
     honestExceptionReason: 'Two equally plausible settlement candidates exist (AXIS00182 vs AXIS00189). Auto-resolving either poses a high risk of double reconciliation. Deterministic rules safely blocked execution.',
-    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 1).toISOString(),
     historicalMemoryMatches: 12
   };
 }
@@ -266,7 +294,7 @@ function createCase4_MoneyLeakageRecovery(): ExceptionCase {
       '✓ Intermediate Bank Charge verified as non-contractual',
       '✓ Action Authorized: CREATE RECOVERY CASE'
     ],
-    createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 8).toISOString(),
     recoveryAmount: 500,
     recoveryNotes: 'Recovery claim #REC-48294 generated for ₹500 against Partner Bank Clearing Ops.',
     historicalMemoryMatches: 39
@@ -318,7 +346,7 @@ function createCase5_MissingRefundWebhook(): ExceptionCase {
       '⚠️ AI Confidence (88.5%) below safe threshold (95.0%) for auto-resolution',
       '✓ Policy Action Executed: Send to Human Review with Webhook Audit Trail'
     ],
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 12).toISOString(),
     historicalMemoryMatches: 18
   };
 }
@@ -368,13 +396,13 @@ function createCase6_FeeMismatchDiscrepancy(): ExceptionCase {
       '✓ Zero unexplained delta',
       '✓ Auto-Resolution Executed'
     ],
-    createdAt: new Date(Date.now() - 3600000 * 14).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - 3600000 * 14).toISOString(),
     historicalMemoryMatches: 65
   };
 }
 
 function generateRandomEasyCase(caseNum: number, merchant: { id: string; name: string }): ExceptionCase {
-  const payment = Math.floor(Math.random() * 40000) + 5000;
+  const payment = Math.floor(randomValue() * 40000) + 5000;
   const refund = Math.floor(payment * 0.1);
   const fee = Math.floor(payment * 0.01);
   const net = payment - refund - fee;
@@ -391,7 +419,7 @@ function generateRandomEasyCase(caseNum: number, merchant: { id: string; name: s
     category: 'PARTIAL_REFUND',
     urgency: 'LOW',
     status: 'RESOLVED',
-    aiConfidence: Number((95 + Math.random() * 4.5).toFixed(1)),
+    aiConfidence: Number((95 + randomValue() * 4.5).toFixed(1)),
     moneyTrail: [
       { stage: 'PAYMENT', label: 'Payment Captured', expectedAmount: payment, actualAmount: payment, delta: 0, status: 'MATCH', detailNote: `Payment ${payment}` },
       { stage: 'REFUND', label: 'Refund Processed', expectedAmount: -refund, actualAmount: -refund, delta: 0, status: 'MATCH', detailNote: `Refund ${refund}` },
@@ -408,13 +436,13 @@ function generateRandomEasyCase(caseNum: number, merchant: { id: string; name: s
     authorizedAction: 'AUTO_RESOLVE',
     aiReasoning: 'Easy exception resolved automatically via evidence synthesis.',
     ruleValidationNotes: ['✓ Auto-resolve authorized by deterministic policy engine'],
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toISOString(),
-    historicalMemoryMatches: Math.floor(Math.random() * 50) + 10
+    createdAt: new Date(REPLAY_CLOCK - Math.floor(randomValue() * 86400000)).toISOString(),
+    historicalMemoryMatches: Math.floor(randomValue() * 50) + 10
   };
 }
 
 function generateRandomDelayCase(caseNum: number, merchant: { id: string; name: string }): ExceptionCase {
-  const payment = Math.floor(Math.random() * 80000) + 10000;
+  const payment = Math.floor(randomValue() * 80000) + 10000;
   const fee = Math.floor(payment * 0.01);
   const net = payment - fee;
 
@@ -430,7 +458,7 @@ function generateRandomDelayCase(caseNum: number, merchant: { id: string; name: 
     category: 'TIMING_MISMATCH',
     urgency: 'LOW',
     status: 'RESOLVED',
-    aiConfidence: Number((92 + Math.random() * 5).toFixed(1)),
+    aiConfidence: Number((92 + randomValue() * 5).toFixed(1)),
     moneyTrail: [
       { stage: 'PAYMENT', label: 'Payment Captured', expectedAmount: payment, actualAmount: payment, delta: 0, status: 'MATCH', detailNote: 'Payment captured' },
       { stage: 'ACTUAL_SETTLEMENT', label: 'T+1 Delayed Payout', expectedAmount: net, actualAmount: net, delta: 0, status: 'RESOLVED', detailNote: 'Batch payout completed 24h later' }
@@ -445,13 +473,13 @@ function generateRandomDelayCase(caseNum: number, merchant: { id: string; name: 
     authorizedAction: 'AUTO_RESOLVE',
     aiReasoning: 'Settlement timing shift confirmed.',
     ruleValidationNotes: ['✓ Timing delay validated'],
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toISOString()
+    createdAt: new Date(REPLAY_CLOCK - Math.floor(randomValue() * 86400000)).toISOString()
   };
 }
 
 function generateRandomRecoveryCase(caseNum: number, merchant: { id: string; name: string }): ExceptionCase {
-  const payment = Math.floor(Math.random() * 50000) + 15000;
-  const leakage = 400 + Math.floor(Math.random() * 600);
+  const payment = Math.floor(randomValue() * 50000) + 15000;
+  const leakage = 400 + Math.floor(randomValue() * 600);
   const fee = Math.floor(payment * 0.01);
   const net = payment - fee - leakage;
 
@@ -483,14 +511,14 @@ function generateRandomRecoveryCase(caseNum: number, merchant: { id: string; nam
     authorizedAction: 'RECOVERY_CASE',
     aiReasoning: `Identified ₹${leakage} money leakage. Recovery ticket logged.`,
     ruleValidationNotes: ['✓ Money leakage recovery action authorized'],
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toISOString(),
+    createdAt: new Date(REPLAY_CLOCK - Math.floor(randomValue() * 86400000)).toISOString(),
     recoveryAmount: leakage,
     recoveryNotes: `Recovery case opened for ₹${leakage}`
   };
 }
 
 function generateRandomAmbiguousCase(caseNum: number, merchant: { id: string; name: string }): ExceptionCase {
-  const payment = Math.floor(Math.random() * 90000) + 30000;
+  const payment = Math.floor(randomValue() * 90000) + 30000;
   const net = Math.floor(payment * 0.99);
 
   return {
@@ -526,6 +554,6 @@ function generateRandomAmbiguousCase(caseNum: number, merchant: { id: string; na
       '🛑 Auto-resolution BLOCKED'
     ],
     honestExceptionReason: 'Two conflicting settlement batches match transaction amount. Execution safely blocked.',
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toISOString()
+    createdAt: new Date(REPLAY_CLOCK - Math.floor(randomValue() * 86400000)).toISOString()
   };
 }

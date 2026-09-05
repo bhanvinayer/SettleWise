@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExceptionCase, BenchmarkMetrics, PolicyGuardrails, DecisionAction } from './types/settlewise';
+import { ExceptionCase, BenchmarkMetrics, PolicyGuardrails, DecisionAction, LangGraphTelemetry } from './types/settlewise';
 import { generateSyntheticBatch } from './engine/syntheticDataEngine';
 import { runCounterfactualReplayBenchmark } from './engine/counterfactualReplay';
 import { DEFAULT_POLICY_GUARDRAILS } from './engine/policyEngine';
@@ -13,6 +13,8 @@ import { MoneyRecoveryManager } from './components/MoneyRecoveryManager';
 import { CounterfactualReplayModal } from './components/CounterfactualReplayModal';
 import { PolicyGuardrailsConfigurator } from './components/PolicyGuardrailsConfigurator';
 import { LandingPage } from './components/LandingPage';
+import { runLangGraphExecutionTrace } from './engine/langgraphEngine';
+import { traceInvestigation } from './services/observability';
 
 export type ActiveView = 'command-center' | 'exceptions' | 'recoveries' | 'policy' | 'batch-runs';
 
@@ -26,6 +28,8 @@ export function App() {
   const [guardrails, setGuardrails] = useState<PolicyGuardrails>(DEFAULT_POLICY_GUARDRAILS);
 
   const [selectedCase, setSelectedCase] = useState<ExceptionCase | null>(null);
+  const [selectedTelemetry, setSelectedTelemetry] = useState<LangGraphTelemetry | null>(null);
+  const [observabilityStatus, setObservabilityStatus] = useState<'idle' | 'traced' | 'unavailable'>('idle');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -45,6 +49,24 @@ export function App() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  useEffect(() => {
+    if (!selectedCase) {
+      setSelectedTelemetry(null);
+      return;
+    }
+    let cancelled = false;
+    setSelectedTelemetry(null);
+    runLangGraphExecutionTrace(selectedCase, guardrails).then(telemetry => {
+      if (!cancelled) {
+        setSelectedTelemetry(telemetry);
+        traceInvestigation(selectedCase, telemetry)
+          .then(() => { if (!cancelled) setObservabilityStatus('traced'); })
+          .catch(() => { if (!cancelled) setObservabilityStatus('unavailable'); });
+      }
+    });
+    return () => { cancelled = true; };
+  }, [selectedCase, guardrails]);
 
   const handleUpdateCaseAction = (caseId: string, newAction: DecisionAction, note: string) => {
     setCases(prev =>
@@ -98,6 +120,7 @@ export function App() {
             setSearchQuery(query);
             if (query.trim()) setActiveView('command-center');
           }}
+          observabilityStatus={observabilityStatus}
         />
 
         <div className="content-area">
@@ -132,6 +155,7 @@ export function App() {
           {activeView === 'policy' && (
             <PolicyGuardrailsConfigurator
               guardrails={guardrails}
+              metrics={metrics}
               onClose={() => setActiveView('command-center')}
               onSave={updated => {
                 setGuardrails(updated);
@@ -160,6 +184,7 @@ export function App() {
           exceptionCase={selectedCase}
           onClose={() => setSelectedCase(null)}
           onUpdateAction={handleUpdateCaseAction}
+          telemetry={selectedTelemetry}
         />
       )}
 
@@ -191,6 +216,7 @@ export function App() {
       {showPolicyModal && (
         <PolicyGuardrailsConfigurator
           guardrails={guardrails}
+          metrics={metrics}
           onClose={() => setShowPolicyModal(false)}
           onSave={updated => {
             setGuardrails(updated);

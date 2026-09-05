@@ -4,9 +4,10 @@ import { evaluatePolicyRules, DEFAULT_POLICY_GUARDRAILS } from './policyEngine';
 
 export function runCounterfactualReplayBenchmark(
   batchSize: number = 50,
-  guardrails: PolicyGuardrails = DEFAULT_POLICY_GUARDRAILS
+  guardrails: PolicyGuardrails = DEFAULT_POLICY_GUARDRAILS,
+  replaySeed: string = 'SW-TRACK04-001'
 ): BenchmarkMetrics {
-  const cases = generateSyntheticBatch(batchSize);
+  const cases = generateSyntheticBatch(batchSize, replaySeed);
 
   let cleanRecords = 0;
   let injectedExceptions = 0;
@@ -18,6 +19,9 @@ export function runCounterfactualReplayBenchmark(
   let totalRupeesReconciled = 0;
   let moneyLeakageDetected = 0;
   let totalInvestigationTime = 0;
+  let correctActionDecisions = 0;
+  let falsePositiveCount = 0;
+  let safeEscalationCount = 0;
 
   const honestExceptionsList: ExceptionCase[] = [];
 
@@ -30,8 +34,19 @@ export function runCounterfactualReplayBenchmark(
     const policyRes = evaluatePolicyRules(c, guardrails);
     c.authorizedAction = policyRes.authorizedAction;
 
-    // Check diagnosis precision (H1 title alignment)
-    if (c.aiConfidence >= 85) {
+    // Compare the policy outcome with the labeled synthetic ground truth.
+    if (policyRes.authorizedAction === c.groundTruthAction) {
+      correctActionDecisions++;
+    }
+    if (policyRes.authorizedAction === 'AUTO_RESOLVE' && !c.groundTruthShouldAutoResolve) {
+      falsePositiveCount++;
+    }
+    if (policyRes.authorizedAction !== 'AUTO_RESOLVE' && !c.groundTruthShouldAutoResolve) {
+      safeEscalationCount++;
+    }
+
+    // Diagnosis precision is based on the generated case label, not confidence alone.
+    if (c.groundTruthCategory === c.category) {
       correctDiagnoses++;
     }
 
@@ -78,6 +93,10 @@ export function runCounterfactualReplayBenchmark(
     totalRupeesReconciled,
     moneyLeakageDetected,
     avgInvestigationTimeSec: Number((totalInvestigationTime / batchSize).toFixed(2)),
-    honestExceptionsList
+    honestExceptionsList,
+    replaySeed,
+    correctActionDecisions,
+    falsePositiveRate: Number(((falsePositiveCount / batchSize) * 100).toFixed(1)),
+    safeEscalationRate: Number(((safeEscalationCount / Math.max(injectedExceptions, 1)) * 100).toFixed(1))
   };
 }

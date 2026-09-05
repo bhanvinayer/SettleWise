@@ -123,6 +123,9 @@ export interface ExceptionCase {
   recoveryAmount?: number;
   recoveryNotes?: string;
   historicalMemoryMatches?: number;
+  groundTruthCategory?: ExceptionCategory;
+  groundTruthAction?: DecisionAction;
+  groundTruthShouldAutoResolve?: boolean;
 }
 
 export interface PolicyGuardrails {
@@ -149,6 +152,10 @@ export interface BenchmarkMetrics {
   moneyLeakageDetected: number;
   avgInvestigationTimeSec: number;
   honestExceptionsList: ExceptionCase[];
+  replaySeed: string;
+  correctActionDecisions: number;
+  falsePositiveRate: number;
+  safeEscalationRate: number;
 }
 
 export interface InstitutionalPattern {

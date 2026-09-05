@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
-import { PolicyGuardrails } from '../types/settlewise';
+import { BenchmarkMetrics, PolicyGuardrails } from '../types/settlewise';
 import { Lock, X, RotateCcw } from 'lucide-react';
 import { DEFAULT_POLICY_GUARDRAILS } from '../engine/policyEngine';
+import { PolicyRecommendation, requestPolicyRecommendation } from '../services/observability';
 
 interface PolicyGuardrailsConfiguratorProps {
   guardrails: PolicyGuardrails;
+  metrics: BenchmarkMetrics | null;
   onSave: (updated: PolicyGuardrails) => void;
   onClose: () => void;
 }
 
 export const PolicyGuardrailsConfigurator: React.FC<PolicyGuardrailsConfiguratorProps> = ({
   guardrails,
+  metrics,
   onSave,
   onClose
 }) => {
   const [config, setConfig] = useState<PolicyGuardrails>({ ...guardrails });
+  const [recommendation, setRecommendation] = useState<PolicyRecommendation | null>(null);
+  const [recommendationError, setRecommendationError] = useState('');
+  const [isRecommending, setIsRecommending] = useState(false);
 
   const handleReset = () => {
     setConfig({ ...DEFAULT_POLICY_GUARDRAILS });
@@ -23,6 +29,18 @@ export const PolicyGuardrailsConfigurator: React.FC<PolicyGuardrailsConfigurator
   const handleSave = () => {
     onSave(config);
     onClose();
+  };
+
+  const handleRecommendation = async () => {
+    setIsRecommending(true);
+    setRecommendationError('');
+    try {
+      setRecommendation(await requestPolicyRecommendation(config, metrics));
+    } catch (error) {
+      setRecommendationError(error instanceof Error ? error.message : 'AI recommendation unavailable');
+    } finally {
+      setIsRecommending(false);
+    }
   };
 
   return (
@@ -55,6 +73,31 @@ export const PolicyGuardrailsConfigurator: React.FC<PolicyGuardrailsConfigurator
 
         {/* Config Options */}
         <div className="p-6 space-y-5 text-xs text-slate-300 overflow-y-auto max-h-[70vh]">
+          <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div>
+                <div className="font-bold text-white font-mono">AI Policy Recommendation</div>
+                <div className="text-[11px] text-slate-400 mt-1">Groq reviews the current guardrails and replay evidence. Rules still require your approval.</div>
+              </div>
+              <button onClick={handleRecommendation} disabled={isRecommending} className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-xs font-bold">
+                {isRecommending ? 'Reviewing...' : 'Ask Groq'}
+              </button>
+            </div>
+            {recommendationError && <div className="text-[11px] text-amber-300">{recommendationError}</div>}
+            {recommendation && (
+              <div className="mt-3 space-y-2">
+                <div className="text-xs text-slate-200">{recommendation.summary}</div>
+                <div className="text-[10px] font-mono uppercase text-blue-300">Risk: {recommendation.riskLevel}</div>
+                {recommendation.recommendedChanges.map(change => (
+                  <div key={change.field} className="p-2 rounded-lg bg-slate-900/70 border border-slate-800">
+                    <div className="font-mono text-[11px] text-white">{change.field}: {String(change.value)}</div>
+                    <div className="text-[11px] text-slate-400 mt-1">{change.reason}</div>
+                  </div>
+                ))}
+                <div className="text-[11px] text-slate-300 leading-relaxed">{recommendation.reasoning}</div>
+              </div>
+            )}
+          </div>
           
           {/* Rule 1: Min Confidence */}
           <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">

@@ -10,6 +10,7 @@ interface TopbarProps {
   activeView: ActiveView;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  observabilityStatus: 'idle' | 'traced' | 'unavailable';
 }
 
 const VIEW_LABELS: Record<ActiveView, string> = {
@@ -20,7 +21,7 @@ const VIEW_LABELS: Record<ActiveView, string> = {
   'batch-runs':     'Batch Runs',
 };
 
-export const Topbar: React.FC<TopbarProps> = ({ metrics, onRunBatch, onOpenPolicy, activeView, searchQuery, onSearchQueryChange }) => {
+export const Topbar: React.FC<TopbarProps> = ({ metrics, onRunBatch, onOpenPolicy, activeView, searchQuery, onSearchQueryChange, observabilityStatus }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -74,6 +75,17 @@ export const Topbar: React.FC<TopbarProps> = ({ metrics, onRunBatch, onOpenPolic
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }}
             className="animate-pulse-dot" />
           Operational
+        </div>
+
+        <div title="Langfuse trace delivery status" style={{
+          display: 'flex', alignItems: 'center', gap: 5, padding: '4px 8px', borderRadius: 5,
+          background: observabilityStatus === 'traced' ? 'var(--success-bg)' : 'var(--surface-2)',
+          border: '1px solid var(--border)', fontSize: 10,
+          color: observabilityStatus === 'traced' ? 'var(--success)' : 'var(--text-muted)',
+          fontFamily: 'JetBrains Mono, monospace',
+        }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: observabilityStatus === 'traced' ? 'var(--success)' : 'var(--text-muted)' }} />
+          Langfuse {observabilityStatus === 'traced' ? 'synced' : observabilityStatus === 'unavailable' ? 'offline' : 'ready'}
         </div>
 
         {/* Functional transaction search */}
